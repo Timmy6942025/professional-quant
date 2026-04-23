@@ -1,0 +1,16 @@
+# Sample configuration for backtesting/forecasting
+ticker: AAPL
+start_date: "2025-01-01"
+end_date: "2026-04-23"
+
+strategy:
+  type: sma_crossover
+  fast_sma: 50
+  slow_sma: 200
+
+risk:
+  max_drawdown: 0.10
+  stop_loss: 0.05
+
+forecast:
+  periods: 30
