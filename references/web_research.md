@@ -1,172 +1,283 @@
-# Web Research Protocol for Deep Analysis
+# Web Research Protocol - Deep Research Edition
 
-## When to Use Web Research
+## When Web Research is MANDATORY
 
-**MANDATORY for every analysis:**
-1. Recent earnings releases (last 3 months)
-2. Major news events affecting stock price
-3. Sector-wide events (rate changes, regulation, etc.)
-4. Analyst upgrades/downgrades
-5. Upcoming catalysts (earnings dates, product launches, FOMC meetings)
+You MUST do web research for EVERY analysis unless specifically told not to. Missing recent developments = incomplete analysis.
 
-## Web Research Workflow
+**Minimum triggers:**
+1. Earnings in last 3 months (actual results, not just estimates)
+2. Stock moved >5% in last 5 days (find the catalyst)
+3. User asks about fundamentals (don't guess, research)
+4. Major news events (product launches, regulatory, M&A)
+5. Analyst actions (upgrades, downgrades, price targets)
+6. Sector rotation events (Fed meetings, economic data)
 
-### Step 1: Search Recent News (Last 30 Days)
-Use websearch tool with these queries:
+---
+
+## Deep Research Workflow (The "Insane" Protocol)
+
+### Phase 1: Multi-Source News Scan (10+ sources)
+
+Don't just read one article. Read MULTIPLE sources with different perspectives.
+
+```bash
+# Primary news sources to search
+websearch("TICKER stock news 2026")
+websearch("TICKER earnings results Q1 2026")
+websearch("TICKER analyst rating 2026")
+websearch("TICKER price target wall street consensus")
+
+# Sentiment/checking for manipulation
+websearch("TICKER seeking alpha")
+websearch("TICKER bloomberg terminal")
+websearch("TICKER reuters")
+websearch("TICKER marketwatch")
+
+# Alternative perspectives (contrarian sources)
+websearch("TICKER bear case 2026")
+websearch("TICKER short interest 2026")
+```
+
+### Phase 2: Primary Source Research (Read the actual documents)
+
+**Earnings calls are gold** - don't just read summaries.
+
+```bash
+# Earnings call transcripts (full text via webfetch)
+webfetch("[URL from earnings call site]")
+
+# SEC filings (raw data)
+webfetch("https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TICKER&type=10-K")
+webfetch("https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=TICKER&type=10-Q")
+
+# Company IR pages (official statements)
+webfetch("https://investor.TICKER.com/")
+```
+
+### Phase 3: Cross-Verification
+
+**Never trust one source.** Verify with 3+ sources.
 
 ```
-"TICKER stock news 2026"
-"TICKER earnings Q1 2026"
-"TICKER analyst rating upgrade downgrade"
-"TICKER price target Wall Street"
+1. Article says "Beat earnings by $0.23"
+   → Cross-check: Was it actually $0.23? (SEC filing, earnings call)
+
+2. "Analyst raised PT to $280"
+   → Cross-check: Is this consensus or outlier? (Multiple analyst PTs)
+
+3. "Revenue up 12%"
+   → Cross-check: Is this organic or acquisitions? (Segment breakdown)
 ```
 
-### Step 2: Sector/Market Context
+### Phase 4: Timeline Reconstruction
+
+**Map news events to price movements.**
+
 ```
-"tech sector outlook 2026" (for tech stocks)
-"Fed interest rates 2026 impact stocks"
-"market regime 2026 bull bear"
+Timeline for AMZN:
+- Jan 15: "AWS growth accelerates" → Stock up 3% same day
+- Feb 2: Earnings beat → Stock up 5% next day
+- Feb 20: "Competition from MSFT Azure" → Stock down 2%
+- Mar 1: Analyst upgrade to $280 → Stock up 1%
+
+CONCLUSION: News events correlate with price moves. 
+Recent catalyst is [most recent news], likely driving current sentiment.
 ```
 
-### Step 3: Company-Specific Deep Dives
+### Phase 5: Sentiment Tracking
+
+**How has narrative changed over time?**
+
 ```
-"TICKER AWS growth 2026" (for AMZN)
-"TICKER AI strategy 2026" (for tech)
-"TICKER competition 2026"
+30 days ago: "AMZN faces antitrust headwinds"
+15 days ago: "AMZN wins cloud contract, AWS momentum"
+Today: "AMZN AI services driving cloud growth"
+
+SHIFT: Narrative shifted from bearish (regulatory) to bullish (AI/cloud)
+This explains why stock is up X% despite [macro headwinds].
 ```
 
-### Step 4: Read Key Articles with webfetch
-When websearch returns URLs, use webfetch to read full articles:
-- Earnings call transcripts
-- Analyst reports (seeking alpha, motley fool)
-- SEC filing summaries
-- Major news from Reuters/AP/Bloomberg
+### Phase 6: Forward-Looking Research
 
-## What to Extract from Web Research
+**What's NEXT, not just what happened.**
 
-### Earnings & Fundamentals
-- Revenue growth rate (YoY)
-- EPS surprises (beat/miss)
-- Guidance raised/lowered
+```bash
+# Upcoming catalysts
+websearch("TICKER earnings date Q2 2026")
+websearch("TICKER product launch 2026")
+websearch("TICKER conference presentation 2026")
+
+# Macro factors affecting stock
+websearch("Fed meeting date 2026 impact tech stocks")
+websearch("tech sector outlook 2026")
+websearch("AI spending forecast 2026")
+
+# Risk factors
+websearch("TICKER regulatory risk 2026")
+websearch("TICKER competition 2026 threat")
+```
+
+---
+
+## Source Categories & What to Extract
+
+### Category 1: Earnings & Fundamentals
+**What to find:**
+- Revenue growth rate (YoY, QoQ)
+- EPS actual vs estimated (beat/miss magnitude)
+- Guidance changes (raised/lowered/maintained)
+- Segment performance (which division driving results)
 - Margin trends (expanding/contracting)
 
-### News Catalysts
-- Product launches
-- Mergers & acquisitions
-- Regulatory changes
-- Leadership changes (CEO/CFO)
-- Partnerships/collaborations
+**Red flags:**
+- "Beat by penny" (barely beat)
+- Revenue growth slowing but margins expanding (cost cutting, not growth)
+- Guidance raised but stock still down (expectations even higher)
 
-### Analyst Sentiment
-- Price targets (high/low/consensus)
-- Rating changes (buy/sell/hold)
-- Key arguments for/against
+### Category 2: Analyst Actions
+**What to find:**
+- Price target consensus (high/low/average)
+- Recent upgrades/downgrades (who, why)
+- Rating distribution (X buy, Y hold, Z sell)
+- Key bull arguments (what makes them BUY)
+- Key bear arguments (what makes them SELL)
 
-### Market Context
-- Interest rate sensitivity
-- Sector rotation trends
-- Geopolitical risks
-- Consumer spending trends
+**Check:** Is consensus price target achievable given fundamentals?
 
-## Integrating Web Research into Deep Analysis
+### Category 3: News Catalysts
+**What to find:**
+- Product launches (when, what, market impact)
+- M&A activity (acquisitions, partnerships)
+- Regulatory changes (headwind or tailwind)
+- Leadership changes (CEO/CFO departures)
+- Legal issues (lawsuits, investigations)
 
-### In "Signal Conflict Resolution" Section:
-"Web research reveals [specific event] happened on [date], explaining why backtest (which uses historical data) says BUY but forecast (which sees current overbought conditions) says SELL..."
+### Category 4: Market Context
+**What to find:**
+- Interest rate sensitivity (how will Fed affect this stock)
+- Sector rotation (is money flowing in or out of sector)
+- Index performance (how does stock compare to SPY/QQQ)
+- Correlation breakdown (is this stock moving with or against sector)
 
-### In "Fundamental Inference" Section:
-"Web research shows:
-- Revenue grew X% YoY (source: earnings call)
-- Analyst consensus price target: $X (source: Yahoo Finance)
-- Recent upgrade from MS to BUY (source: Bloomberg)
-This suggests fundamentals support [bullish/bearish] thesis..."
+### Category 5: Alternative/Critical Perspectives
+**What to find:**
+- Short seller reports (infer from search: "TICKER short seller")
+- Bear cases from contrarian analysts
+- Risk factors rarely mentioned in bullish articles
+- Insider selling/buying patterns
 
-### In "Scenario Analysis" Section:
-"Bull case catalyst: [upcoming event from web research]
-Bear case catalyst: [risk factor from web research]"
+---
 
-### In "Contrarian Perspective" Section:
-"Consensus view is [bullish/bearish] based on [web finding].
-However, [contrarian insight from deep research] suggests..."
+## Integration Into Deep Analysis
 
-## Search Tips for Better Results
-
-### Use Year + Quarter Specifics
-- "Q1 2026" not just "recent"
-- "April 2026" for timely results
-
-### Search Multiple Sources
-- Search: "TICKER seeking alpha"
-- Search: "TICKER reuters"
-- Search: "TICKER bloomberg"
-- Compare narratives across sources
-
-### Verify with Primary Sources
-- Don't just trust headlines
-- Use webfetch to read actual earnings transcripts
-- Check company IR page for official statements
-
-## Red Flags to Watch For
-
-When doing web research:
-1. **Pump and dump articles** - Overly promotional, no risks mentioned
-2. **Outdated information** - News from 6 months ago that's priced in
-3. **Conflicting narratives** - Dig deeper to find truth
-4. **Paid promotions** - Clearly sponsored content
-5. **Clickbait headlines** - Read full article, not just title
-
-## The "Insane" Deep Research Edge
-
-What separates shallow web search from insane deep research:
-
-1. **Primary source obsession** - Read earnings transcripts, not summaries
-2. **Cross-verification** - Check 3+ sources before believing
-3. **Timeline reconstruction** - Map news events to price movements
-4. **Sentiment tracking** - How did narrative change over time?
-5. **Future-looking** - What's NEXT, not just what happened
-
-## Example Deep Research for AMZN
-
+### In "Signal Conflict Resolution":
 ```
-websearch("AMZN earnings Q1 2026")
-→ Found: "Amazon beats EPS by $0.23, revenue up 12%"
+"Backtest says BUY (156% return historically) but forecast says SELL 
+(RSI=93 overbought). Web research reveals WHY: recent earnings beat 
+by 23 cents with raised guidance - fundamental story is strong despite 
+overbought technicals. This explains the conflict: technicals show 
+short-term overbought, fundamentals show long-term bullish. RESOLUTION: 
+BUY on pullback to support, not chase at current levels."
+```
 
-websearch("AMZN AWS growth 2026")
-→ Found: "AWS growth accelerates to 18%, AI services driving demand"
+### In "Scenario Analysis":
+```
+"Bull case catalyst: [Specific event from web research, e.g., 
+'Analysts expect AWS growth to accelerate to 25% in Q2 2026']
+
+Bear case trigger: [Specific risk from web research, e.g., 
+'Regulatory scrutiny of cloud market could limit AMZN pricing power']"
+```
+
+### In "Contrarian Perspective":
+```
+"Consensus is BUY (15 analysts with price targets averaging $280).
+However, short interest is X% of float, and web research reveals 
+[contrarian concern, e.g., 'competition from MSFT and GOOGL intensifying'].
+This creates potential for [specific negative scenario].
+
+What's NOT priced in: [Surprise that could move stock significantly]."
+```
+
+---
+
+## Research Quality Checklist
+
+Before finishing web research, verify:
+- [ ] Read at least 3 different sources (different perspectives)
+- [ ] Read primary source (earnings call transcript, not summary)
+- [ ] Cross-verified key facts with 2+ sources
+- [ ] Identified the RECENT catalyst (what moved stock recently)
+- [ ] Found upcoming catalysts (earnings date, events)
+- [ ] Found contrarian perspectives (bear case, risks)
+- [ ] Mapped news timeline to price movements
+- [ ] Identified what's priced in vs. not priced in
+- [ ] Updated scenario probabilities based on research
+
+---
+
+## "Insane" Deep Research Example
+
+```python
+# Phase 1: Multi-source scan
+websearch("AMZN earnings Q1 2026")
+→ Results: Reuters, Bloomberg, Seeking Alpha, Yahoo Finance
 
 websearch("AMZN analyst price target 2026")
-→ Found: "15 analysts raise PT to $280, citing AI momentum"
+→ Results: MS raises to $300, GS stays at $275, BofA at $285
 
-webfetch("https://www.reuters.com/...") [from search result]
-→ Read full earnings call transcript
+# Phase 2: Primary source
+webfetch("https://seekingalpha.com/article/...")
+→ Read FULL earnings call transcript
+→ Extract: "AWS revenue up 18% YoY, AI services growing faster than expected"
 
-Synthesis: "Web research reveals AWS accelerating (18% growth), 
-AI services gaining traction. 15 analysts raised PT to $280.
-This supports STRONG BUY thesis from backtest, despite 
-overbought RSI. The fundamental story overrides technicals."
+# Phase 3: Cross-verification
+Check: "Did AWS really grow 18%?"
+→ Verify with SEC 10-Q filing
+→ Confirmed: AWS segment shows $XXB revenue, +18% YoY
+
+# Phase 4: Timeline reconstruction
+Feb 2: Earnings beat → +5%
+Feb 5: MS upgrade to $300 → +2%
+Feb 10: "AI competition" article → -1%
+Feb 15: Today → Current price reflects all above
+
+# Phase 5: Forward-looking
+websearch("AMZN Q2 2026 earnings date")
+→ "Expected April 25, 2026"
+
+# Synthesis
+"Web research reveals strong AWS fundamentals, multiple analyst 
+upgrades, upcoming earnings catalyst. Narrative has shifted from 
+'cloud competition concerns' to 'AI-driven growth story'. This 
+supports bullish thesis despite overbought RSI. Next catalyst: 
+Q2 earnings April 25."
 ```
 
-## Mandatory Integration
+---
 
-**Add to deep_thought_template.md section:**
-```
-### 9. Web Research Findings (75+ words)
-**Key News (Last 30 Days):**
-- [Event] on [Date]: [Impact on price]
-- [Event] on [Date]: [Impact on price]
+## Red Flags in Research
 
-**Earnings & Fundamentals:**
-- Revenue growth: X% YoY
-- EPS surprise: Beat/Miss by $X
-- Guidance: Raised/Maintained/Lowered
+**Warning signs that article may be unreliable:**
+1. Only cites one source (no cross-verification possible)
+2. Uses vague language ("likely", "might", "could") without specifics
+3. No mention of risks (overly bullish = suspicious)
+4. Predates major events (outdated information)
+5. Anonymous sources (can't verify)
+6. Sponsored content (not clearly marked)
+7. Contradicts SEC filings (someone is lying)
 
-**Analyst Sentiment:**
-- Price target consensus: $X
-- Recent upgrades/downgrades: [Details]
+---
 
-**Upcoming Catalysts:**
-- [Event] on [Date]: Potential impact
-- [Event] on [Date]: Potential impact
+## Minimum Standards
 
-**How This Changes My Analysis:**
-[Integration with technical signals, scenario analysis, etc.]
-```
+**You MUST:**
+1. Search at least 3 different sources
+2. Fetch at least 1 primary source (earnings transcript, SEC filing)
+3. Identify recent catalyst (what moved stock recently)
+4. Find upcoming catalysts (earnings date, events)
+5. Get analyst consensus (price targets, ratings)
+6. Find contrarian view (risks, bear case)
+7. Integrate findings into deep analysis sections
+
+**Skip at your own risk:** This is the difference between shallow and "insane" research.
