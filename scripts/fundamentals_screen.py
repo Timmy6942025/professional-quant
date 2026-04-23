@@ -174,7 +174,7 @@ def screen_fundamentals(ticker):
         dividend_yield = info.get('dividendYield')
         payout_ratio = info.get('payoutRatio')
         
-        print(f"  Dividend Yield: {dividend_yield:.2f}%" if dividend_yield else "  Dividend Yield: N/A")
+        print(f"  Dividend Yield: {dividend_yield*100:.2f}%" if dividend_yield else "  Dividend Yield: N/A")
         print(f"  Payout Ratio: {payout_ratio*100:.1f}%" if payout_ratio else "  Payout Ratio: N/A")
         
         if dividend_yield:
