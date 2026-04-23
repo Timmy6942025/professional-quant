@@ -4,6 +4,10 @@ A professional quantitative trading skill for AI agents. Deep analysis, decisive
 
 **Always uses current date automatically** (datetime.now()) - never hallucinates dates.
 
+---
+
+## Install
+
 Copy-paste this prompt into **any AI agent** (OpenCode, Claude, GPT, etc.) to install the skill:
 
 ```
@@ -20,6 +24,22 @@ Then tell me "Skill installed. Ready for deep quant analysis."
 **OpenCode users** can also run:
 ```bash
 opencode install professional-quant
+```
+
+---
+
+## Update
+
+When you make changes to the repo, users can update with one command:
+```bash
+# Option 1: Run the update script (easiest)
+~/.agents/skills/professional-quant/update-skill.sh
+
+# Option 2: Direct git pull
+cd ~/.agents/skills/professional-quant && git pull
+
+# Option 3: Re-install fresh (if issues)
+git clone https://github.com/Timmy6942025/professional-quant.git ~/.agents/skills/professional-quant --force
 ```
 
 ---
