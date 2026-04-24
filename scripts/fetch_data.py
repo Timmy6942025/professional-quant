@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import yfinance as yf
 import argparse
-import os
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from utils import flatten_yf_data
 from datetime import datetime
 
 def fetch_data(ticker, start="2025-01-01", end=None):
@@ -10,6 +12,9 @@ def fetch_data(ticker, start="2025-01-01", end=None):
     df = yf.download(ticker, start=start, end=end, progress=False)
     if df.empty:
         raise ValueError(f"No data found for ticker {ticker}")
+    
+    # Flatten MultiIndex columns (yfinance compat)
+    df = flatten_yf_data(df)
     output_path = f"{ticker}_data.csv"
     df.to_csv(output_path)
     print(f"Data saved to {output_path}")

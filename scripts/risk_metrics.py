@@ -3,6 +3,9 @@ import yfinance as yf
 import numpy as np
 import argparse
 import pandas as pd
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from utils import flatten_yf_data, extract_price_data
 from datetime import datetime
 
 def calculate_comprehensive_risk(ticker, start="2020-01-01", end=None):
@@ -12,9 +15,8 @@ def calculate_comprehensive_risk(ticker, start="2020-01-01", end=None):
     if df.empty:
         raise ValueError(f"No data for {ticker}")
     
-    # Handle MultiIndex
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = [col[0] for col in df.columns]
+    # Flatten MultiIndex columns (yfinance compat)
+    df = flatten_yf_data(df)
     
     close = df['Close']
     returns = close.pct_change().dropna()
@@ -48,9 +50,7 @@ def calculate_comprehensive_risk(ticker, start="2020-01-01", end=None):
     
     # Beta (vs S&P 500)
     try:
-        spy = yf.download("SPY", start=start, end=end, progress=False)['Close']
-        if isinstance(spy, pd.DataFrame):
-            spy = spy.iloc[:, 0]
+        spy = extract_price_data(yf.download("SPY", start=start, end=end, progress=False), 'Close')
         spy_returns = spy.pct_change().dropna()
         
         # Align the series

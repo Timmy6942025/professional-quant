@@ -12,6 +12,9 @@ import argparse
 import numpy as np
 import pandas as pd
 from datetime import datetime
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from utils import flatten_yf_data
 
 # STRICT CONSTANTS
 EXCHANGE_FEE = 0.001  # 0.1% fee per transaction (entry AND exit)
@@ -65,9 +68,8 @@ def backtest_strategy(ticker, start="2020-01-01", end=None):
     if df.empty:
         raise ValueError(f"No data for {ticker}")
     
-    # Handle MultiIndex
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = [col[0] for col in df.columns]
+    # Flatten MultiIndex columns (yfinance compat)
+    df = flatten_yf_data(df)
     
     close = df['Close']
     open_price = df['Open'] if 'Open' in df.columns else close
