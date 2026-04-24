@@ -1,5 +1,7 @@
 # Cognitive Biases & Second-Level Thinking
 
+> **Role in this skill**: Supplementary reference — a detailed bias catalog and pre-trade checklist. Use as a *lookup* when you detect bias in your reasoning, not as a mandatory worksheet. For the active bias-combatting protocol, see `references/self_verification.md` and `references/model_pitfalls.md`.
+
 ## Biases That Destroy Returns
 
 ### 1. Confirmation Bias
@@ -119,7 +121,7 @@ Ask yourself:
 
 ---
 
-## The "Insane" Trader Mindset
+## The Professional Trader Mindset
 
 What separates legends from average traders:
 

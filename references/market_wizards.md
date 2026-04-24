@@ -1,4 +1,6 @@
-# Market Wizards Principles & Trading LORE
+# Market Wizards Principles & Trading Lore
+
+> **Role in this skill**: Mental model library — channel these legends when doing second-level thinking. This is NOT a script to follow, but a set of perspectives to adopt. Use their questions ("What would Druckenmiller do?") as thinking prompts, not as decision rules. For the structured reasoning process, see `references/thesis_first.md` and `references/self_verification.md`.
 
 ## Core Philosophies from Trading Legends
 
@@ -58,7 +60,7 @@
 
 ---
 
-## The "Insane" Synthesis - What Legends Have in Common
+## The Professional Synthesis - What Legends Have in Common
 
 ### 1. They Trade the MARKET, Not Their Opinion
 ```
@@ -153,9 +155,9 @@ When doing deep analysis, channel each wizard:
 
 ---
 
-## The Ultimate Trading Checklist
+## The Trading Thinking Prompts
 
-Before ANY trade, verify ALL of the following:
+Use these as thinking prompts before significant trades — not as mandatory gates for every decision:
 
 ### Trend & Market Context
 - [ ] Is market in uptrend or downtrend?

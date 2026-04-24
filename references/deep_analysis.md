@@ -1,206 +1,139 @@
-# Deep Analysis Guidelines - MANDATORY
+# Deep Analysis: The Reasoning Operating System
 
-## CRITICAL: Deep Thinking Protocol
+## What Deep Analysis Actually Is
 
-You MUST think deeply about every aspect of the analysis. This is not optional. Shallow analysis = useless analysis.
+Deep analysis is NOT filling out sections. It's NOT mentioning every indicator. It's NOT writing 1000 words regardless of quality.
 
----
-
-## Step 1: Run All Scripts (EXACT ORDER)
-
-Execute in order, wait for each to complete:
-1. `python3 scripts/fetch_data.py TICKER` - Get raw data (2+ years minimum)
-2. `python3 scripts/forecast.py TICKER` - Get price prediction + technical signals
-3. `python3 scripts/backtest.py TICKER` - Get strategy backtest results
-4. `python3 scripts/risk_metrics.py TICKER` - Get comprehensive risk profile
-5. `python3 scripts/sector_comparison.py TICKER --peers ...` - Compare to sector
-6. `python3 scripts/news_sentiment.py TICKER` - Get news sentiment
-7. `python3 scripts/master_analysis.py TICKER` - Get final aggregated verdict
-
-**Record ALL outputs** - you need specific numbers for analysis.
+**Deep analysis is finding the 2-4 variables that matter most and reasoning about them with causal rigor.**
 
 ---
 
-## Step 2: DEEP ANALYTICAL THINKING (Minimum 1000 words)
+## The Reasoning Hierarchy
 
-After running scripts, you MUST produce deep analysis covering ALL sections below:
+### Level 1: Observation (Necessary but Insufficient)
+"RSI is 70." "Revenue grew 12%." "The stock is above the 200-day SMA."
 
-### A. Signal Conflict Resolution (CRITICAL)
+Observations are raw data. They're necessary inputs, but they're not analysis. Anyone can read a number off a screen.
 
-**Never average conflicting signals - RESOLVE them.**
+### Level 2: Interpretation (Minimum Standard)
+"RSI is 70, which historically for THIS stock has meant a 5-10% pullback within 2 weeks 7 out of 10 times."
 
-1. List EVERY signal from every script (forecast, backtest, risk, sentiment, sector)
-2. Identify which signals CONFLICT (e.g., forecast SELL vs backtest STRONG BUY)
-3. Explain WHY conflict exists using specific mechanisms:
-   - "Forecast says SELL because RSI=93 (overbought) but backtest says BUY because momentum_20d returned 2156% historically when RSI was elevated but MACD was bullish"
-   - "Risk metrics show HIGH risk (Sharpe=0.8) but backtest shows 156% return - WHY? Because Sharpe is based on volatility, not direction. High volatility ≠ losing money"
-4. WEIGH signals by reliability for THIS timeframe:
-   - Short-term (1-30 days): Technicals > Fundamentals > Backtest
-   - Long-term (6+ months): Fundamentals > Backtest > Technicals
-5. Make a DECISION - don't waffle with "could be either"
+Interpretation adds context. It connects the observation to historical outcomes. It's analysis, but it's still correlational — it doesn't explain WHY.
 
-### B. Technical Deep Dive (Stock-specific)
+### Level 3: Causal Reasoning (The Standard)
+"RSI is 70 because the stock rallied 15% in 3 weeks on the back of an earnings beat that raised forward estimates by 8%. The overbought reading reflects genuine fundamental improvement, not speculative excess. In similar situations where RSI is elevated BUT supported by upward estimate revisions, the stock typically continues higher, not lower."
 
-**Generic RSI analysis = lazy. Analyze THIS stock.**
+Causal reasoning explains the MECHANISM. It tells you WHY the observation exists and what that means for the future. This is where edge lives.
 
-For EACH indicator, answer:
-1. What does this indicator mean SPECIFICALLY for THIS stock?
-2. What historical context exists? (e.g., "AMZN RSI hit 93 in Jan 2024 and dropped 15%")
-3. Is current reading at an EXTREME or moderate level?
-4. What does divergence/convergence with price suggest?
+### Level 4: Second-Order Reasoning (Aspirational)
+"RSI is 70 because of the earnings beat. But the earnings beat was driven by a one-time tax benefit that inflated EPS by $0.30, while organic growth actually decelerated from 18% to 14%. The market is celebrating the headline number, but the underlying trend is weakening. When the next quarter shows the organic deceleration, the stock will de-rate. The overbought RSI isn't a technical signal — it's a fundamental mispricing signal."
 
-Indicators to analyze:
-- RSI: Overbought/oversold, divergence from price, rising/falling trend
-- MACD: Crossover, histogram slope, signal strength
-- Bollinger Bands: Position (%B), bandwidth (volatility), squeeze detection
-- Moving Averages: 20/50/200 SMA alignment, golden/death cross history
-- Volume: Price-volume divergence, volume profile, institutional flow
-- Support/Resistance: Key levels, breakouts, fakeouts
-
-### C. Fundamental Inference from Price Action
-
-**Don't have fundamentals? INFER them from price.**
-
-- Why is stock up X% YTD? What narrative supports this?
-- Is price movement backed by fundamentals or speculation?
-- What does P/E expansion vs contraction suggest about expectations?
-- Sector context: How does this stock compare to sector ETF performance?
-- Interest rate sensitivity: Is this a growth stock sensitive to rates?
-
-### D. Risk-Reward Calculus (ACTUAL NUMBERS)
-
-**Calculate expected value, not just feelings.**
-
-```
-Expected Value = (Win Probability × Win Size) - (Loss Probability × Loss Size)
-
-Example:
-- Backtest win rate: 62% → Win Probability = 0.62
-- Average win: 15% → Win Size = 0.15
-- Average loss: -8% → Loss Size = 0.08
-- Loss Probability: 38% → 1 - 0.62 = 0.38
-
-EV = (0.62 × 0.15) - (0.38 × 0.08)
-EV = 0.093 - 0.030
-EV = 0.063 = 6.3% expected return per trade
-```
-
-Also analyze:
-- Asymmetric payoff: Is upside 3x downside?
-- Max drawdown: Can you handle -45% peak-to-trough?
-- Sharpe ratio interpretation: Is 1.5 good for THIS volatility regime?
-
-### E. Scenario Analysis with PROBABILITIES
-
-**Every scenario needs a probability and catalyst.**
-
-| Scenario | Probability | Catalyst | Target | Timeframe |
-|----------|-------------|----------|--------|----------|
-| Bull | 30% | [What drives this?] | $XXX | X months |
-| Base | 50% | [Most likely path] | $XXX | X months |
-| Bear | 15% | [What triggers drop?] | $XXX | X months |
-| Black Swan | 5% | [Tail risk] | $XXX | Any |
-
-For each scenario answer:
-- What NEEDS to happen for this scenario to occur?
-- What events would INVALIDATE this scenario?
-- Where is the "line in the sand" that changes everything?
-
-### F. Contrarian Thinking (What Consensus Gets Wrong)
-
-**Challenge every assumption.**
-
-1. What is the consensus view on this stock?
-2. Is the consensus RIGHT or WRONG? (Be specific)
-3. Where is smart money positioned? (Long? Short? Flat?)
-4. What's PRICED IN that everyone knows?
-5. What's NOT PRICED IN that could surprise?
-6. What would make you WRONG? (Define your "out")
-
-### G. Time Horizon Alignment
-
-**Are all timeframes aligned or conflicting?**
-
-| Horizon | Signal | Conviction |
-|---------|--------|------------|
-| Short (1-30 days) | [Momentum direction] | High/Med/Low |
-| Medium (1-6 months) | [Fundamental direction] | High/Med/Low |
-| Long (6+ months) | [Secular trend] | High/Med/Low |
-
-**Critical**: If timeframes conflict, identify WHICH one drives current price action.
-
-### H. Macro-Micro Linkage
-
-**How do macro forces affect THIS stock?**
-
-For each relevant macro factor:
-- Fed policy: Rate hikes/cuts → Impact on this stock
-- Dollar strength: USD up/down → Impact on this stock
-- Sector rotation: Risk-on/risk-off → Impact on this stock
-- Economic data: CPI/jobs → Impact on this stock
-- Geopolitical: War/trade → Impact on this stock
-
-### I. Edge Case & Tail Risk Identification
-
-**What could go catastrophically wrong?**
-
-1. Chart patterns suggesting topping formation?
-2. Fundamental risks not in consensus view?
-3. Black swan scenarios (war, pandemic, regulatory)?
-4. Liquidity risks if market drops?
-5. Correlation breakdown risks?
+Second-order reasoning looks BEHIND the apparent cause. It asks: "Is the obvious explanation the REAL explanation?" This is the level that separates good analysts from great ones.
 
 ---
 
-## Step 3: Output Structure (MANDATORY)
+## How to Think About Conflicting Signals
 
-```
-## DEEP QUANTITATIVE ANALYSIS: [TICKER]
+### The Wrong Approach: Average Them
 
-### Executive Summary (2-3 sentences)
-[Clear thesis with conviction level]
+"Forecast says BUY, backtest says SELL, sentiment is NEUTRAL → I'll say HOLD."
 
-### Signal Analysis [Conflict Resolution]
-[Explain why signals agree/disagree, which is most reliable]
+This is not analysis — it's abdication. You're letting the tools make the decision for you by averaging away the conflict.
 
-### Technical Deep Dive
-[Indicator-by-indicator analysis for THIS stock]
+### The Right Approach: Resolve Them
 
-### Fundamental Inference
-[What price action tells us about fundamentals]
+1. **WHY do they conflict?** Identify the mechanism behind the disagreement.
+   - Different time horizons? (forecast = short-term, backtest = long-term average)
+   - Different data inputs? (forecast = price + technicals, backtest = price + volume)
+   - Different assumptions? (forecast assumes trend continuation, backtest includes regime changes)
 
-### Risk-Reward Profile
-[Expected value calculation, asymmetric opportunities]
+2. **Which signal is more reliable for THIS decision?**
+   - If your thesis is about a short-term catalyst → Trust the short-term signal more
+   - If your thesis is about a structural shift → Trust the long-term signal more
+   - If the conflict is about data quality → Trust the primary source more
 
-### Scenario Analysis
-[Bull/Base/Bear/Black Swan with probabilities]
+3. **Does the conflict reveal something important?**
+   - Conflicting signals often point to a transitional period where the old pattern is breaking and a new one is forming
+   - This IS the insight — not something to average away, but something to understand
 
-### Contrarian Perspective
-[What consensus misses]
+### Conflict Resolution Framework
 
-### Macro-Micro Linkage
-[How macro affects this stock specifically]
-
-### Final Verdict
-**RECOMMENDATION: [BUY/SELL/HOLD]**  
-**CONFIDENCE: [HIGH/MEDIUM/LOW]**  
-**TIME HORIZON: [Short/Medium/Long]**  
-**KEY RISK: [Single biggest risk]**  
-**ENTRY TARGET: $X.XX**  
-**STOP LOSS: $X.XX**  
-**UPSIDE: X% | DOWNSIDE: X%**  
-**RISK:REWARD: 1:X**
-```
+| Conflict Type | Likely Cause | Resolution |
+|---------------|-------------|------------|
+| Forecast bullish, backtest bearish | Different time horizons | Which horizon does YOUR thesis address? |
+| Technicals bullish, fundamentals weak | Momentum vs value | Is the move backed by fundamentals or speculation? |
+| Sentiment bullish, insider selling | Smart money vs crowd | Who is usually right in this situation? |
+| Short-term oversold, long-term downtrend | Mean reversion vs trend | Trend > mean reversion in downtrends |
+| Backtest strong, but regime changed | Past ≠ future | Does the strategy work in THIS regime? |
 
 ---
 
-## Thinking Standards
+## How to Connect Qualitative and Quantitative Evidence
 
-- **Minimum 1000 words** of analysis (not counting script output)
-- **Every section MUST be filled** - no skipping
-- **Specific numbers from scripts** in all reasoning
-- **No hedging language** - "might", "could", "possibly" = weak
-- **Probabilistic thinking** - "60% likely" not "will go up"
-- **Stock-specific analysis** - not generic "RSI overbought"
-- **Resolve conflicts** - don't average, decide
-- **Define your "out"** - what makes you wrong?
+### The Integration Mindset
+
+Don't treat qualitative and quantitative as separate tracks that converge at the end. They should inform each other throughout.
+
+- **Qualitative first**: Your understanding of the business, competitive dynamics, and management quality should shape WHICH quantitative tools you use and HOW you interpret their output.
+- **Quantitative as test**: Use scripts to test whether the data supports your qualitative thesis.
+- **Qualitative as override**: If the numbers say one thing but your qualitative analysis says another, the qualitative usually wins — BUT ONLY if it's evidence-based, not just a feeling.
+
+### Integration Example
+
+**Qualitative thesis**: "This company has a durable moat because of switching costs, and the recent selloff is an overreaction to a temporary headwind."
+
+**Quantitative test**:
+- Run `backtest.py` → Does the stock historically recover from similar selloffs?
+- Run `fundamentals_screen.py` → Are margins holding despite the headwind?
+- Run `earnings_quality.py` → Has management guided for recovery?
+
+**Qualitative override**: If the backtest shows that the stock DOESN'T recover from these selloffs, ask WHY. Is the moat weaker than you thought? Is the headwind not temporary? The qualitative thesis may need revision.
+
+---
+
+## How to Move from Facts to Decision
+
+### The Decision Pipeline
+
+1. **Facts** → What do we know? (Specific numbers, events, data)
+2. **Interpretations** → What do the facts mean? (In context, for THIS asset)
+3. **Thesis** → What is the causal argument? (Why will price move?)
+4. **Edge** → What is the market missing? (Your specific advantage)
+5. **Decision** → BUY/SELL/HOLD/WAIT/PASS (Based on edge + risk/reward)
+6. **Sizing** → How much? (Based on conviction + risk)
+7. **Exit** → When do I change my mind? (Monitoring triggers)
+
+### The Common Mistake: Jumping from Facts to Decision
+
+"RSI is 30 → BUY" skips 5 steps. The correct reasoning is:
+
+"RSI is 30 → [Interpretation] This stock is in a downtrend and RSI 30 is not unusual → [Thesis] The oversold reading does NOT indicate a bottom because the fundamental trend is negative → [Edge] The market is NOT mispricing this — the low RSI reflects real deterioration → [Decision] PASS — no edge in buying a falling knife without a catalyst."
+
+---
+
+## The Importance Hierarchy
+
+Not all analysis sections are equally important. Allocate your effort proportionally.
+
+| Importance | What to Focus On | Why |
+|------------|-----------------|-----|
+| **Critical** | Causal thesis + Edge + Kill switch | These determine whether you have a trade at all |
+| **High** | Key evidence (2-4 facts), Opposing case, Scenario analysis | These determine conviction and sizing |
+| **Medium** | Risk/reward, Timeframe alignment, Macro context | These calibrate the decision |
+| **Low** | Full indicator rundown, Detailed backtest stats | Supporting context, not decision drivers |
+
+**Spend 70% of your effort on Critical and High items. Don't let the Low-importance items consume your analysis.**
+
+---
+
+## Quality Standards
+
+- **Every claim needs a cause** — Not "the stock will go up" but "the stock will go up BECAUSE [mechanism]"
+- **Every signal needs context** — Not "RSI is 70" but "RSI is 70, which for THIS stock has meant [specific historical outcome]"
+- **Every conflict needs resolution** — Not "signals are mixed" but "signals are mixed because [reason], and I resolve this by [method]"
+- **Every thesis needs a kill switch** — "I am wrong if [specific event]"
+- **Every decision needs sizing** — Not just direction, but magnitude based on conviction
+- **Every position needs an exit** — Defined before entry, not after
+- **No padding** — Don't write 500 words of generic analysis to reach a word count. Write 200 words of insight instead.
+
+**The standard is: would a professional portfolio manager find this analysis decision-useful? If not, rewrite it.**

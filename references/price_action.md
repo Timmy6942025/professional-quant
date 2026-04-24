@@ -1,5 +1,7 @@
 # Price Action & Market Microstructure
 
+> **Role in this skill**: Sub-tool reference — technical analysis depth for when price action is relevant to your thesis. This is ONE input among many, not the primary lens. Always contextualize price action within your causal thesis (see `references/thesis_first.md`). For how technical signals interact with qualitative factors, see `references/qualitative_mosaic.md`.
+
 ## Candlestick Psychology
 
 ### Bullish Patterns
@@ -68,7 +70,7 @@
 - Entry signal on 3 timeframes = High probability
 - Signal on 1 timeframe only = Low probability
 
-## The "Insane" Price Action Edge
+## The Deep Price Action Edge
 
 What separates good from great:
 
