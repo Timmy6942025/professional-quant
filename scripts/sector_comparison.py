@@ -53,7 +53,8 @@ def analyze_sector_comparison(ticker, sector_etf="XLK", peers=None, start="2020-
     
     # Beta to sector
     cov_matrix = aligned.cov()
-    beta_to_sector = float(cov_matrix.iloc[0, 1]) / float(sector_returns.var()) if float(sector_returns.var()) != 0 else 0.0
+    sector_var = float(sector_returns.var())
+    beta_to_sector = float(cov_matrix.iloc[0, 1]) / sector_var if sector_var != 0 else 0.0
     
     # Output
     print(f"\nPERFORMANCE COMPARISON (since {start}):")
@@ -61,7 +62,7 @@ def analyze_sector_comparison(ticker, sector_etf="XLK", peers=None, start="2020-
     print(f"{'-'*70}")
     print(f"{'Total Return':<25} {stock_total:>14.2f}% {sector_total:>14.2f}% {stock_total/sector_total if sector_total != 0 else 0.0:>10.2f}x")
     print(f"{'Annualized Volatility':<25} {stock_vol:>14.2f}% {sector_vol:>14.2f}% {stock_vol/sector_vol:>10.2f}x")
-    print(f"{'Sharpe Ratio':<25} {float(stock_sharpe):>14.2f} {float(sector_sharpe):>14.2f} {float(stock_sharpe/sector_sharpe):>10.2f}x")
+    print(f"{'Sharpe Ratio':<25} {stock_sharpe:>14.2f} {sector_sharpe:>14.2f} {stock_sharpe/sector_sharpe:>10.2f}x")
     
     print(f"\nRELATIONSHIP TO SECTOR:")
     print(f"  Correlation to {sector_etf}: {correlation:.3f}")
