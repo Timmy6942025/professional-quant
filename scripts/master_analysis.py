@@ -99,8 +99,8 @@ def run_master_analysis(ticker):
         else:
             results["backtest"] = "SELL"
 
-        # Parse alpha vs buy & hold
-        alpha_match = re.search(r"Alpha Generated: ([+-]?\d+\.\d+)%", result.stdout)
+        # Parse alpha vs buy & hold (annualized)
+        alpha_match = re.search(r"Alpha Generated \(annualized\): ([+-]?\d+\.\d+)%", result.stdout)
         if alpha_match:
             results["alpha_vs_buy_hold"] = float(alpha_match.group(1))
 
@@ -272,7 +272,7 @@ def run_master_analysis(ticker):
     print(f"    - Uncertainty: {results.get('uncertainty', 'N/A')}%")
 
     print(f"\n  Backtest Conviction: {results.get('backtest', 'N/A')}")
-    print(f"    - Alpha vs Buy&Hold: {results.get('alpha_vs_buy_hold', 'N/A')}%")
+    print(f"    - Alpha vs Buy&Hold (annualized): {results.get('alpha_vs_buy_hold', 'N/A')}%")
     print(f"    - Sharpe: {results.get('backtest_sharpe', 'N/A')}")
 
     print(f"\n  Risk Rating: {results.get('risk', 'N/A')}")

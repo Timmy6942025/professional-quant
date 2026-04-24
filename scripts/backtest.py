@@ -223,30 +223,51 @@ def backtest_strategy(ticker, start="2020-01-01", end=None):
     bh_cumulative = (1 + buy_hold_returns).cumprod()
     buy_hold_max_dd = float(((bh_cumulative / bh_cumulative.cummax()) - 1).min() * 100)
 
+    # Annualized returns for proper alpha comparison
+    trading_days = len(returns)
+    years = trading_days / 252 if trading_days > 0 else 1
+    if years > 0:
+        buy_hold_annualized = ((1 + buy_hold_return / 100) ** (1 / years) - 1) * 100
+    else:
+        buy_hold_annualized = 0
+
     # ==========================================================================
     # OUTPUT
     # ==========================================================================
-    print(f"\n{'=' * 70}")
+    sep = 93
+    print(f"\n{'=' * sep}")
     print(f"BACKTEST RESULTS: {ticker} ({start} to {end})")
     print(f"Friction Applied: {EXCHANGE_FEE * 100:.1f}% fee + {SLIPPAGE * 100:.1f}% slippage per trade")
     print(f"Max Leverage Capped: {MAX_LEVERAGE:.1f}x")
-    print(f"{'=' * 70}")
+    print(f"{'=' * sep}")
 
-    print(f"\n{'Strategy':<25} {'Return':>10} {'Sharpe':>10} {'Max DD':>10} {'Win%':>8} {'Trades':>8} {'Alpha':>10}")
-    print(f"{'-' * 70}")
+    print(
+        f"\n{'Strategy':<25} {'Return':>10} {'Ann.Ret':>10} "
+        f"{'Sharpe':>10} {'Max DD':>10} {'Win%':>8} "
+        f"{'Trades':>8} {'Alpha':>10}"
+    )
+    print("-" * sep)
 
     for r in results:
-        alpha = r["return"] - buy_hold_return
-        result_str = "WIN" if r["win"] else "LOSS"
+        # Annualize strategy return for proper alpha comparison
+        strat_total = r["return"]
+        if strat_total > -100 and years > 0:
+            strategy_annualized = ((1 + strat_total / 100) ** (1 / years) - 1) * 100
+        else:
+            strategy_annualized = strat_total
+        alpha = strategy_annualized - buy_hold_annualized
         print(
             f"{r['strategy']:<25} {r['return']:>9.2f}% "
+            f"{strategy_annualized:>9.2f}% "
             f"{r['sharpe']:>10.2f} {r['max_dd']:>9.2f}% "
-            f"{r['win_rate']:>7.1f}% {r['num_trades']:>8} {alpha:>+9.2f}%"
+            f"{r['win_rate']:>7.1f}% {r['num_trades']:>8} "
+            f"{alpha:>+9.2f}%"
         )
 
     # Baseline
     print(
         f"{'Buy & Hold (Baseline)':<25} {buy_hold_return:>9.2f}% "
+        f"{buy_hold_annualized:>9.2f}% "
         f"{buy_hold_sharpe:>10.2f} {buy_hold_max_dd:>9.2f}% "
         f"{'N/A':>8} {'N/A':>8} {'0.00%':>10}"
     )
@@ -254,13 +275,25 @@ def backtest_strategy(ticker, start="2020-01-01", end=None):
     # Find best strategy
     best = max(results, key=lambda x: x["return"])
 
-    print(f"\n{'=' * 70}")
+    best_total = best["return"]
+    if best_total > -100 and years > 0:
+        best_annualized = ((1 + best_total / 100) ** (1 / years) - 1) * 100
+    else:
+        best_annualized = best_total
+    best_alpha = best_annualized - buy_hold_annualized
+
+    print(f"\n{'=' * 93}")
     print(f"BEST STRATEGY: {best['strategy']}")
-    print(f"Return: {best['return']:.2f}% | Sharpe: {best['sharpe']:.2f} | Max DD: {best['max_dd']:.2f}%")
+    print(
+        f"Return: {best['return']:.2f}% | "
+        f"Ann.Return: {best_annualized:.2f}% | "
+        f"Sharpe: {best['sharpe']:.2f} | "
+        f"Max DD: {best['max_dd']:.2f}%"
+    )
     print(
         f"Win Rate: {best['win_rate']:.1f}% | "
         f"Trades: {best['num_trades']} | "
-        f"Alpha vs Buy&Hold: {best['return'] - buy_hold_return:+.2f}%"
+        f"Alpha vs Buy&Hold (annualized): {best_alpha:+.2f}%"
     )
 
     # ==========================================================================
@@ -286,11 +319,11 @@ def backtest_strategy(ticker, start="2020-01-01", end=None):
         warnings.append("WARNING: No trades executed - Check position logic and shift() rule.")
 
     if warnings:
-        print(f"\n{'!' * 70}")
+        print(f"\n{'!' * sep}")
         print("SANITY CHECK TRIPWIRES TRIGGERED:")
         for w in warnings:
             print(f"  ⚠ {w}")
-        print(f"{'!' * 70}\n")
+        print(f"{'!' * sep}\n")
         results.append({"warnings": warnings})
 
     # Conviction
@@ -300,16 +333,15 @@ def backtest_strategy(ticker, start="2020-01-01", end=None):
         conviction = "STRONG BUY (Alpha Generated)"
     elif best["return"] > buy_hold_return:
         conviction = "BUY (Positive Alpha)"
-    elif best["return"] < buy_hold_return - 10:
+    elif best_annualized < buy_hold_annualized - 10:
         conviction = "STRONG SELL (Underperforms Buy&Hold)"
     else:
         conviction = "SELL (No Alpha)"
 
-    print(f"\n{'=' * 70}")
+    print(f"\n{'=' * 93}")
     print(f"BACKTEST CONVICTION: {conviction}")
-    bh_alpha = best["return"] - buy_hold_return
-    print(f"Alpha Generated: {bh_alpha:+.2f}% vs Buy&Hold")
-    print(f"{'=' * 70}\n")
+    print(f"Alpha Generated (annualized): {best_alpha:+.2f}% vs Buy&Hold ({buy_hold_annualized:.2f}%/yr)")
+    print(f"{'=' * 93}\n")
 
     return results
 
