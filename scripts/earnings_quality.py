@@ -8,6 +8,9 @@ import argparse
 import numpy as np
 import pandas as pd
 import yfinance as yf
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from utils import flatten_yf_data, extract_price_data, safe_float
 from datetime import datetime, timedelta
 
 def analyze_earnings_quality(ticker):
