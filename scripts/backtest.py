@@ -25,6 +25,23 @@ SLIPPAGE = 0.0005  # 0.05% slippage per trade
 MAX_LEVERAGE = 1.0  # No leverage allowed (cap at 1x)
 
 
+def annualized_return(total_return_pct, years):
+    """Convert cumulative total return (%) to annualized return (CAGR).
+
+    Uses the CAGR formula: ((1 + r)^(1/n) - 1) * 100
+
+    Args:
+        total_return_pct: Cumulative total return as percentage (e.g., 277.66)
+        years: Number of years (trading_days / 252)
+
+    Returns:
+        Annualized return as percentage, or total_return_pct if invalid inputs
+    """
+    if years <= 0 or total_return_pct <= -100:
+        return total_return_pct
+    return ((1 + total_return_pct / 100) ** (1 / years) - 1) * 100
+
+
 def calculate_log_returns(close_prices, positions):
     """
     Calculate log returns with proper compounding.
@@ -226,10 +243,7 @@ def backtest_strategy(ticker, start="2020-01-01", end=None):
     # Annualized returns for proper alpha comparison
     trading_days = len(returns)
     years = trading_days / 252 if trading_days > 0 else 1
-    if years > 0:
-        buy_hold_annualized = ((1 + buy_hold_return / 100) ** (1 / years) - 1) * 100
-    else:
-        buy_hold_annualized = 0
+    buy_hold_annualized = annualized_return(buy_hold_return, years)
 
     # ==========================================================================
     # OUTPUT
@@ -250,11 +264,7 @@ def backtest_strategy(ticker, start="2020-01-01", end=None):
 
     for r in results:
         # Annualize strategy return for proper alpha comparison
-        strat_total = r["return"]
-        if strat_total > -100 and years > 0:
-            strategy_annualized = ((1 + strat_total / 100) ** (1 / years) - 1) * 100
-        else:
-            strategy_annualized = strat_total
+        strategy_annualized = annualized_return(r["return"], years)
         alpha = strategy_annualized - buy_hold_annualized
         print(
             f"{r['strategy']:<25} {r['return']:>9.2f}% "
@@ -274,12 +284,7 @@ def backtest_strategy(ticker, start="2020-01-01", end=None):
 
     # Find best strategy
     best = max(results, key=lambda x: x["return"])
-
-    best_total = best["return"]
-    if best_total > -100 and years > 0:
-        best_annualized = ((1 + best_total / 100) ** (1 / years) - 1) * 100
-    else:
-        best_annualized = best_total
+    best_annualized = annualized_return(best["return"], years)
     best_alpha = best_annualized - buy_hold_annualized
 
     print(f"\n{'=' * 93}")
