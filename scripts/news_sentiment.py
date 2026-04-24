@@ -7,7 +7,6 @@ import yfinance as yf
 import re
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from utils import flatten_yf_data, extract_price_data, safe_float
 from datetime import datetime
 
 def analyze_news_sentiment(ticker):
@@ -93,8 +92,10 @@ def analyze_news_sentiment(ticker):
         print(f"  If sentiment bearish but RSI < 30: Potential bear trap")
         print(f"  Aligned sentiment + RSI: Higher conviction setup")
         
+    except KeyError as e:
+        print(f"\nNews sentiment error: Missing field in news data - {e}")
     except Exception as e:
-        print(f"\nNews sentiment error: {e}")
+        print(f"\nNews sentiment error: {type(e).__name__} - {e}")
     
     print(f"\n{'='*70}\n")
 

@@ -10,16 +10,21 @@ import numpy as np
 import yfinance as yf
 from prophet import Prophet
 import argparse
+import re
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from utils import flatten_yf_data
 from datetime import datetime
+
+def validate_ticker(ticker):
+    """Validate ticker format to prevent path traversal/injection."""
+    if not isinstance(ticker, str) or not re.match(r'^[A-Z]{1,5}$', ticker.upper()):
+        raise ValueError(f"Invalid ticker: '{ticker}'. Must be 1-5 uppercase letters.")
+    return ticker.upper()
 
 def calculate_technical_indicators(df):
     """Add technical indicators - NO look-ahead bias"""
     df = df.copy()
-    
-    # Handle MultiIndex columns from yfinance
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = [col[0] for col in df.columns]
-    
     close = df['Close']
     
     # RSI
@@ -50,6 +55,7 @@ def calculate_technical_indicators(df):
 
 def forecast_stock(ticker, periods=30):
     """Professional-grade forecast using Prophet"""
+    ticker = validate_ticker(ticker)
     end_date = datetime.now().strftime('%Y-%m-%d')
     
     # Fetch extended history for better training  
@@ -57,9 +63,8 @@ def forecast_stock(ticker, periods=30):
     if df.empty:
         raise ValueError(f"No data for {ticker}")
     
-    # Handle MultiIndex
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = [col[0] for col in df.columns]
+    # Flatten MultiIndex columns (yfinance compat)
+    df = flatten_yf_data(df)
     
     # Calculate technical indicators
     df = calculate_technical_indicators(df)
@@ -100,8 +105,9 @@ def forecast_stock(ticker, periods=30):
     sma_50 = float(latest['SMA_50'])
     sma_200 = float(latest['SMA_200'])
     
-    # Save detailed forecast
-    output_path = f"{ticker}_forecast.csv"
+    # Save detailed forecast (validate path)
+    safe_ticker = re.sub(r'[^A-Za-z0-9]', '_', ticker)
+    output_path = f"{safe_ticker}_forecast.csv"
     forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]].to_csv(output_path, index=False)
     
     # Output disciplined analysis (NO fake recommendations)
@@ -158,4 +164,9 @@ if __name__ == "__main__":
     parser.add_argument("ticker", help="Stock ticker (e.g., AAPL)")
     parser.add_argument("--periods", type=int, default=30, help="Days to forecast")
     args = parser.parse_args()
-    forecast_stock(args.ticker, args.periods)
+    try:
+        forecast_stock(args.ticker, args.periods)
+    except ValueError as e:
+        print(f"Input error: {e}")
+    except Exception as e:
+        print(f"Forecast error: {type(e).__name__} - {e}")

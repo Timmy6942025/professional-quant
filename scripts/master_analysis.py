@@ -33,7 +33,7 @@ def run_master_analysis(ticker):
     try:
         result = subprocess.run(
             [sys.executable, "forecast.py", ticker],
-            capture_output=True, text=True, cwd="."
+            capture_output=True, text=True, cwd=".", timeout=120
         )
         print(result.stdout)
         
@@ -66,8 +66,14 @@ def run_master_analysis(ticker):
         else:
             results['forecast_signal'] = 'NEUTRAL'
         
+    except FileNotFoundError as e:
+        print(f"Forecast error: Script not found - {e}")
+        results['forecast_signal'] = 'ERROR'
+    except subprocess.TimeoutExpired:
+        print(f"Forecast error: Script timed out")
+        results['forecast_signal'] = 'ERROR'
     except Exception as e:
-        print(f"Forecast error: {e}")
+        print(f"Forecast error: {type(e).__name__} - {e}")
         results['forecast_signal'] = 'ERROR'
     
     # ==========================================================================
@@ -77,7 +83,7 @@ def run_master_analysis(ticker):
     try:
         result = subprocess.run(
             [sys.executable, "backtest.py", ticker],
-            capture_output=True, text=True, cwd="."
+            capture_output=True, text=True, cwd=".", timeout=120
         )
         print(result.stdout)
         
@@ -101,8 +107,14 @@ def run_master_analysis(ticker):
         if sharpe_match:
             results['backtest_sharpe'] = float(sharpe_match.group(1))
         
+    except FileNotFoundError as e:
+        print(f"Backtest error: Script not found - {e}")
+        results['backtest'] = 'ERROR'
+    except subprocess.TimeoutExpired:
+        print(f"Backtest error: Script timed out")
+        results['backtest'] = 'ERROR'
     except Exception as e:
-        print(f"Backtest error: {e}")
+        print(f"Backtest error: {type(e).__name__} - {e}")
         results['backtest'] = 'ERROR'
     
     # ==========================================================================
@@ -112,7 +124,7 @@ def run_master_analysis(ticker):
     try:
         result = subprocess.run(
             [sys.executable, "risk_metrics.py", ticker],
-            capture_output=True, text=True, cwd="."
+            capture_output=True, text=True, cwd=".", timeout=120
         )
         print(result.stdout)
         
@@ -131,8 +143,14 @@ def run_master_analysis(ticker):
         if dd_match:
             results['max_dd'] = float(dd_match.group(1))
         
+    except FileNotFoundError as e:
+        print(f"Risk metrics error: Script not found - {e}")
+        results['risk'] = 'ERROR'
+    except subprocess.TimeoutExpired:
+        print(f"Risk metrics error: Script timed out")
+        results['risk'] = 'ERROR'
     except Exception as e:
-        print(f"Risk metrics error: {e}")
+        print(f"Risk metrics error: {type(e).__name__} - {e}")
         results['risk'] = 'ERROR'
     
     # ==========================================================================
@@ -142,11 +160,15 @@ def run_master_analysis(ticker):
     try:
         result = subprocess.run(
             [sys.executable, "sector_comparison.py", ticker, "--peers", "MSFT", "GOOGL", "META"],
-            capture_output=True, text=True, cwd="."
+            capture_output=True, text=True, cwd=".", timeout=120
         )
         print(result.stdout)
+    except FileNotFoundError as e:
+        print(f"Sector comparison error: Script not found - {e}")
+    except subprocess.TimeoutExpired:
+        print(f"Sector comparison error: Script timed out")
     except Exception as e:
-        print(f"Sector comparison error: {e}")
+        print(f"Sector comparison error: {type(e).__name__} - {e}")
     
     # ==========================================================================
     # 5. Run news_sentiment.py
@@ -155,11 +177,15 @@ def run_master_analysis(ticker):
     try:
         result = subprocess.run(
             [sys.executable, "news_sentiment.py", ticker],
-            capture_output=True, text=True, cwd="."
+            capture_output=True, text=True, cwd=".", timeout=60
         )
         print(result.stdout)
+    except FileNotFoundError as e:
+        print(f"News sentiment error: Script not found - {e}")
+    except subprocess.TimeoutExpired:
+        print(f"News sentiment error: Script timed out")
     except Exception as e:
-        print(f"News sentiment error: {e}")
+        print(f"News sentiment error: {type(e).__name__} - {e}")
     
     # ==========================================================================
     # 6. Kelly Criterion position sizing
@@ -168,11 +194,15 @@ def run_master_analysis(ticker):
     try:
         result = subprocess.run(
             [sys.executable, "kelly_sizer.py", ticker],
-            capture_output=True, text=True, cwd="."
+            capture_output=True, text=True, cwd=".", timeout=60
         )
         print(result.stdout)
+    except FileNotFoundError as e:
+        print(f"Kelly sizer error: Script not found - {e}")
+    except subprocess.TimeoutExpired:
+        print(f"Kelly sizer error: Script timed out")
     except Exception as e:
-        print(f"Kelly sizer error: {e}")
+        print(f"Kelly sizer error: {type(e).__name__} - {e}")
     
     # ==========================================================================
     # 7. Macro economic analysis
@@ -181,11 +211,15 @@ def run_master_analysis(ticker):
     try:
         result = subprocess.run(
             [sys.executable, "macro_analysis.py"],
-            capture_output=True, text=True, cwd="."
+            capture_output=True, text=True, cwd=".", timeout=120
         )
         print(result.stdout)
+    except FileNotFoundError as e:
+        print(f"Macro analysis error: Script not found - {e}")
+    except subprocess.TimeoutExpired:
+        print(f"Macro analysis error: Script timed out")
     except Exception as e:
-        print(f"Macro analysis error: {e}")
+        print(f"Macro analysis error: {type(e).__name__} - {e}")
     
     # ==========================================================================
     # 8. Get earnings context
@@ -205,8 +239,10 @@ def run_master_analysis(ticker):
             print(f"  Market Cap: ${info['marketCap']/1e9:.2f}B")
         if 'recommendationKey' in info:
             print(f"  Analyst Consensus: {info['recommendationKey']}")
+    except KeyError as e:
+        print(f"  Earnings context error: Missing key {e}")
     except Exception as e:
-        print(f"  Earnings context error: {e}")
+        print(f"  Earnings context error: {type(e).__name__} - {e}")
     
     # ==========================================================================
     # OUTPUT STRUCTURED DATA FOR AI SYNTHESIS
