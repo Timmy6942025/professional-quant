@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Correlation Matrix Script (Professional Quant)
+Correlation Matrix Script (Deep Market Analyst)
 ================================================
 - Pairwise correlation analysis
 - Heatmap generation (ASCII)

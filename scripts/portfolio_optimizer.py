@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Portfolio Optimizer Script (Professional Quant)
+Portfolio Optimizer Script (Deep Market Analyst)
 ================================================
 Implements:
 - Mean-Variance Optimization (MVO)

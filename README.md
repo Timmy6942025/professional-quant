@@ -1,4 +1,4 @@
-# Professional-Quant Skill
+# Deep Market Analysis Skill
 
 A deep market intelligence skill for AI agents. **Thesis-driven analysis, not script orchestration.** Decisive conclusions, no disclaimers.
 
@@ -34,7 +34,7 @@ Every analysis follows this process:
 
 ## What Makes This Different
 
-| Traditional Quant Skill | Professional-Quant |
+| Traditional Quant Skill | Deep Market Analysis |
 |------------------------|-------------------|
 | Run all scripts, average signals | Form thesis first, use scripts to test it |
 | "RSI 70 = overbought" | "Earnings decelerating while multiples expand — the market is pricing in a re-acceleration that may not happen" |
@@ -144,19 +144,19 @@ The skill includes a deep reference library organized by purpose:
 Copy-paste this prompt into **any AI agent** (OpenCode, kilo code, Codex, etc.) to install the skill:
 
 ```
-Clone the professional-quant skill from https://github.com/Timmy6942025/professional-quant and set it up in my .agents directory so it works immediately.
+Clone the deep-market-analysis skill from https://github.com/Timmy6942025/deep-market-analysis and set it up in my .agents directory so it works immediately.
 
 Steps:
-1. git clone https://github.com/Timmy6942025/professional-quant.git ~/.agents/skills/professional-quant
+1. git clone https://github.com/Timmy6942025/deep-market-analysis.git ~/.agents/skills/deep-market-analysis
 2. pip3 install --break-system-packages yfinance vectorbt prophet PyPortfolioOpt numpy pandas ruff
-3. Confirm the skill is installed by checking if ~/.agents/skills/professional-quant/SKILL.md exists.
+3. Confirm the skill is installed by checking if ~/.agents/skills/deep-market-analysis/SKILL.md exists.
 
 Then tell me "Skill installed. Ready for deep market analysis."
 ```
 
 **OpenCode users** can also run:
 ```bash
-opencode install professional-quant
+opencode install deep-market-analysis
 ```
 
 ---
@@ -166,13 +166,13 @@ opencode install professional-quant
 When you make changes to the repo, users can update with one command:
 ```bash
 # Option 1: Run the update script (easiest)
-~/.agents/skills/professional-quant/update-skill.sh
+~/.agents/skills/deep-market-analysis/update-skill.sh
 
 # Option 2: Direct git pull
-cd ~/.agents/skills/professional-quant && git pull
+cd ~/.agents/skills/deep-market-analysis && git pull
 
 # Option 3: Re-install fresh (if issues)
-git clone https://github.com/Timmy6942025/professional-quant.git ~/.agents/skills/professional-quant --force
+git clone https://github.com/Timmy6942025/deep-market-analysis.git ~/.agents/skills/deep-market-analysis --force
 ```
 
 ---
@@ -203,7 +203,7 @@ All scripts pass `ruff` linting and formatting with a security-focused configura
 
 ```bash
 # Check for lint issues
-cd ~/.agents/skills/professional-quant && ruff check scripts/
+cd ~/.agents/skills/deep-market-analysis && ruff check scripts/
 
 # Auto-fix trivial lint issues
 ruff check scripts/ --fix
@@ -221,4 +221,4 @@ A **CI workflow** (`.github/workflows/lint.yml`) runs `ruff check`, `ruff format
 
 ## Repository
 
-https://github.com/Timmy6942025/professional-quant
+https://github.com/Timmy6942025/deep-market-analysis

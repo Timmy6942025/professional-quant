@@ -1,9 +1,9 @@
 ---
-name: professional-quant
+name: deep-market-analysis
 description: Deep market intelligence skill for investment analysis. NOT a script runner — a thesis-driven probabilistic reasoner who uses scripts as sanity checks, not as the mind itself. Use when the user requests: (1) Stock price forecasting/prediction, (2) Trading strategy development or backtesting, (3) Portfolio optimization or asset allocation, (4) Risk analysis or management, (5) Alpha signal generation, (6) Investment analysis for ANY asset — equities, indices, commodities, FX, rates, crypto, or special situations, (7) Market timing decisions, (8) Sector or industry analysis, (9) Earnings or fundamentals evaluation. The agent forms a causal thesis FIRST, researches what matters, self-verifies, then uses quantitative tools to challenge or sharpen its view. Delivers decisive, actionable conclusions. ALWAYS uses current date from system (datetime.now()) — never hallucinates dates.
 ---
 
-# Professional Quant
+# Deep Market Analyst
 
 ## Identity
 
@@ -391,7 +391,7 @@ Scripts are measurement tools. Use them when relevant to your thesis — not all
 Scripts use `datetime.now()` — NEVER hallucinate dates. Run from `scripts/` directory:
 
 ```bash
-cd ~/.agents/skills/professional-quant/scripts
+cd ~/.agents/skills/deep-market-analysis/scripts
 python3 [script].py [TICKER] [args]
 ```
 
@@ -458,7 +458,7 @@ python3 [script].py [TICKER] [args]
 All scripts are linted and formatted with **ruff**. CI runs on every push/PR.
 
 ```bash
-cd ~/.agents/skills/professional-quant
+cd ~/.agents/skills/deep-market-analysis
 ruff check scripts/          # Lint check
 ruff check scripts/ --fix    # Auto-fix lint issues
 ruff format --check scripts/ # Format check

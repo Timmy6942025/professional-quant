@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Insider Tracker Script (Professional Quant)
+Insider Tracker Script (Deep Market Analyst)
 ================================================
 - SEC Form 4 tracking
 - Insider transaction analysis

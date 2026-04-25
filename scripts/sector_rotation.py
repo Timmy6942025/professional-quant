@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Sector Rotation Script (Professional Quant)
+Sector Rotation Script (Deep Market Analyst)
 ================================================
 - Sector momentum analysis
 - Rotation signals

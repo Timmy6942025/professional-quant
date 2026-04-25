@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Market Regime Detector Script (Professional Quant)
+Market Regime Detector Script (Deep Market Analyst)
 ================================================
 - Bull/bear/sideways detection
 - Volatility regime analysis

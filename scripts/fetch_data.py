@@ -12,7 +12,7 @@ from datetime import datetime
 
 def fetch_data(ticker, start="2025-01-01", end=None):
     # Validate ticker to prevent path traversal
-    if not isinstance(ticker, str) or not re.match(r"^[A-Z]{1,5}$", ticker.upper()):
+    if not isinstance(ticker, str) or not re.match(r"^[A-Z0-9\-]{1,10}$", ticker.upper()):
         raise ValueError(f"Invalid ticker: '{ticker}'. Must be 1-5 uppercase letters.")
     ticker = ticker.upper()
 

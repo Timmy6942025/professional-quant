@@ -1,4 +1,4 @@
-# Ruff linting configuration for professional-quant scripts
+# Ruff linting configuration for deep-market-analysis scripts
 # Focus: security, exception handling, subprocess safety
 
 # Target Python 3.10+

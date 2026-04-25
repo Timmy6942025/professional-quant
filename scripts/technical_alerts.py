@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Technical Alerts Script (Professional Quant)
+Technical Alerts Script (Deep Market Analyst)
 ================================================
 - Breakout/breakdown detection
 - Support/resistance signals

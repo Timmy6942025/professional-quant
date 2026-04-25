@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Volume Profile Script (Professional Quant)
+Volume Profile Script (Deep Market Analyst)
 ================================================
 - VWAP calculation and analysis
 - Volume at price levels

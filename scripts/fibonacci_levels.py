@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Fibonacci Levels Script (Professional Quant)
+Fibonacci Levels Script (Deep Market Analyst)
 ================================================
 - Key Fibonacci retracement levels
 - Extension levels

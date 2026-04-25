@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Shared Utility Functions for Professional Quant Scripts
+Shared Utility Functions for Deep Market Analyst Scripts
 =========================================================
 Common helpers used across all analysis scripts.
 """

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Short Squeeze Analysis Script (Professional Quant)
+Short Squeeze Analysis Script (Deep Market Analyst)
 ================================================
 - Short interest tracking
 - Days to cover calculation

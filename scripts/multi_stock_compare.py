@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Multi-Stock Compare Script (Professional Quant)
+Multi-Stock Compare Script (Deep Market Analyst)
 ================================================
 - Side-by-side comparison of multiple tickers
 - Performance ranking
