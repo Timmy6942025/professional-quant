@@ -1,8 +1,8 @@
 # edge-hunter skill
 
-A deep market intelligence skill for AI agents. **Thesis-driven analysis, not script orchestration.** Decisive conclusions, no disclaimers.
+A deep market intelligence skill for AI agents. **Real investment work for real capital allocation** — thesis-driven, source-attributed, evidence-chain-based analysis that would withstand scrutiny from a portfolio manager, not a script dump with a clean-looking template.
 
-A deep market intelligence skill for AI agents. **Thesis-driven analysis, not script orchestration.** Decisive conclusions, no disclaimers.
+A deep market intelligence skill for AI agents. **Real investment work for real capital allocation** — thesis-driven, source-attributed, evidence-chain-based analysis that would withstand scrutiny from a portfolio manager, not a script dump with a clean-looking template.
 
 **Always uses current date automatically** (`datetime.now()`) — never hallucinates dates. **Full yfinance access** — 26 scripts powered by free, no-API-key market data.
 

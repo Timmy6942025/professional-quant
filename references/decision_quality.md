@@ -184,3 +184,21 @@ Before finalizing ANY recommendation:
 - [ ] Am I making this decision, or is FOMO/emotion making it for me?
 
 **If you can't check all boxes, either reduce size or pass.**
+
+---
+
+## Real-Money Minimum Bar Checklist
+
+Before outputting an Investment Memo with a BUY/SELL/HOLD verdict, verify all of the following:
+
+- [ ] Do I have a Source Ledger with at least 2 primary sources and 1 opposing source, all with dates?
+- [ ] Does every major factual claim include the source, date, and specific finding?
+- [ ] Does each fact in my Evidence Chain have: Observed → Implies → Matters because?
+- [ ] Have I explicitly named my unresolved unknowns and separated tolerable from thesis-breaking?
+- [ ] Have I compared this idea to 2-3 peer/alternative opportunities (opportunity cost)?
+- [ ] Is my kill-switch a precise condition, not generic concern language?
+- [ ] Have I done Research Depth Accounting — what was investigated, resolved, open, and why the recommendation is justified?
+
+**If any box is unchecked, output Research Memo — not Investment Memo.**
+
+Real investment work has texture. A 3-minute answer with no source ledger and no unresolved section is not real investment work — it looks fake, and it is fake. The mode discipline protects both the analyst and the capital.

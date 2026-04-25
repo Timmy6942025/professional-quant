@@ -149,6 +149,24 @@ The red-team protocol is not a one-time checklist. If your thesis changes signif
 
 ---
 
+
+---
+
+## Real-Money Research Standard: The Minimum Bar
+
+The red-team protocol above is necessary but not sufficient for real capital allocation. Before outputting an Investment Memo recommendation, you must meet ALL of the following:
+
+1. **Source Ledger**: At least 2 primary/near-primary sources and 1 opposing source, each with date and specific finding.
+2. **Evidence Chain**: Each fact connected observation → implication → decision relevance.
+3. **Unresolved**: Explicitly named unknowns, separated into tolerable vs thesis-breaking.
+4. **Opportunity Cost**: Why this is better than 2-3 comparable alternatives right now.
+5. **Kill-Switch**: Precise invalidation condition, not generic concern language.
+6. **Research Depth Accounting**: What was investigated, resolved, and what remains open.
+
+**If any of these is missing, output Research Memo — not a premature Investment Memo.**
+
+The mode discipline is not optional. "I feel strongly about this" is not a substitute for meeting the standard. Real money requires real research texture.
+
 ## Pre-Output Quality Check
 
 Before delivering your analysis, verify:

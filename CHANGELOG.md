@@ -5,6 +5,24 @@ All notable changes to the edge-hunter skill are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2025-01-26
+
+### Changed
+- SKILL.md output standards overhauled: added Real-Money Research Standard (6-item minimum bar before Investment Memo), two-mode discipline (Investment Memo vs Research Memo vs Pass), 13 required memo sections
+- Source Ledger now required for all major factual claims with date and specific finding
+- Evidence Chain format: Observed → Implies → Matters because — causal connection mandatory for every fact
+- New anti-pattern: Research Memo framed as Investment Memo (premature conviction)
+- Added confidence threshold to Research Depth Accounting: unresolved questions >40% of thesis confidence → output WAIT or Research Memo
+- "Research in Depth When the Question Matters" moved from Step 10 to pre-Loop principle
+- "Hedging as humility" anti-pattern clarified: required in Unresolved section, prohibited in thesis/evidence sections
+- Example NVDA memo replaced with source-attributed, evidence-chain-rich version demonstrating real investment work texture
+- README.md: updated intro to emphasize real capital allocation; added note explaining Research Memo mode for extended periods is correct behavior
+- references/self_verification.md: added Real-Money Research Standard section
+- references/decision_quality.md: added Real-Money Minimum Bar Checklist section
+
+### Fixed
+- FutureWarning in macro_analysis.py: all float() calls on pandas Series now use .iloc[-1].item()
+
 ## [2.2.0] - 2026-04-17
 
 ### Added
