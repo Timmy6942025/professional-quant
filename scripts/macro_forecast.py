@@ -49,8 +49,8 @@ def fetch_macro_data(assets, start_date=None):
             if not df.empty:
                 df = flatten_yf_data(df)
                 data[ticker] = df["Close"]
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  [WARNING] Could not fetch {ticker}: {e}")
     return pd.DataFrame(data) if data else pd.DataFrame()
 
 
@@ -88,9 +88,23 @@ def calculate_indicators(series):
     }
 
 
-def directional_forecast(indicators):
-    if not indicators:
-        return "INSUFFICIENT DATA", "INSUFFICIENT DATA"
+def directional_forecast(indicators, ticker=None):
+    """
+    Directional forecast based on technical indicators.
+
+    WARNING: Scoring weights are NOT backtested. Treat as directional alpha signal only.
+    For leveraged tickers (TQQQ, UPRO, SSO, TNA, TZA, SPXL, SPXS), scores are capped
+    at ±4 to prevent misleading readings from amplified volatility.
+    """
+    # Cap scores for leveraged products to prevent inflated signal strength
+    # (ticker param takes priority, but also detect from indicators dict keys)
+    is_leveraged = False
+    leveraged_tickers = {"TQQQ", "UPRO", "SSO", "TNA", "TZA", "SPXL", "SPXS"}
+    if ticker and ticker.upper() in leveraged_tickers:
+        is_leveraged = True
+    # Also detect if any leveraged ticker is in the indicators keys (identify_macro_theme path)
+    if any(t.upper() in leveraged_tickers for t in indicators if isinstance(t, str)):
+        is_leveraged = True
     score = 0
     if indicators["trend_60"] == "ABOVE":
         score += 2
@@ -116,31 +130,38 @@ def directional_forecast(indicators):
         score -= 1
     elif rsi < 30:
         score += 1
+    # Apply leveraged ticker cap before thresholds
+    if is_leveraged:
+        score = max(min(score, 4), -4)
+
     if score >= 3:
-        forecast_3m = "BULLISH "
+        forecast_3m = "BULLISH"
     elif score >= 1:
         forecast_3m = "SLIGHTLY BULLISH"
     elif score <= -3:
-        forecast_3m = "BEARISH "
+        forecast_3m = "BEARISH"
     elif score <= -1:
         forecast_3m = "SLIGHTLY BEARISH"
     else:
-        forecast_3m = "NEUTRAL "
+        forecast_3m = "NEUTRAL"
     score_6m = score
+    # Cap 6m score too for leveraged products
     if indicators["roc_6m"] > 15:
         score_6m += 1
     elif indicators["roc_6m"] < -15:
         score_6m -= 1
+    if is_leveraged:
+        score_6m = max(min(score_6m, 4), -4)
     if score_6m >= 3:
-        forecast_6m = "BULLISH "
+        forecast_6m = "BULLISH"
     elif score_6m >= 1:
         forecast_6m = "SLIGHTLY BULLISH"
     elif score_6m <= -3:
-        forecast_6m = "BEARISH "
+        forecast_6m = "BEARISH"
     elif score_6m <= -1:
         forecast_6m = "SLIGHTLY BEARISH"
     else:
-        forecast_6m = "NEUTRAL "
+        forecast_6m = "NEUTRAL"
     return forecast_3m, forecast_6m
 
 
@@ -184,7 +205,7 @@ def main():
         description="Macro Regime Forecast - 3/6-month directional analysis across asset classes"
     )
     parser.add_argument(
-        "--assets", nargs="+", default=list(DEFAULT_ASSETS.keys()), help="Assets to analyze (default: all macro assets)"
+        "--assets", nargs="+", default=list(DEFAULT_ASSETS), help="Assets to analyze (default: all macro assets)"
     )
     args = parser.parse_args()
 
@@ -225,7 +246,7 @@ def main():
             continue
         ind = indicators[ticker]
         cat, _desc = DEFAULT_ASSETS.get(ticker, ("Other", ""))
-        forecast_3m, forecast_6m = directional_forecast(ind)
+        forecast_3m, forecast_6m = directional_forecast(ind, ticker=ticker)
         rsi = ind["rsi"]
         if rsi > 70:
             rsi_signal = "OVERBOUGHT"
@@ -268,10 +289,13 @@ def main():
     bearish_count = sum(1 for r in results if "BEARISH" in r["forecast_3m"])
     print(f"\n  Bullish signals: {bullish_count}/{len(results)}")
     print(f"  Bearish signals: {bearish_count}/{len(results)}")
+    bias_confidence = abs(bullish_count - bearish_count) / max(len(results), 1)
     if bullish_count > bearish_count * 1.5:
-        print(f"  >> Overall: RISK-ON BIAS")
+        print(f"  >> Overall: RISK-ON BIAS (confidence: {bias_confidence:.1f}/max)")
+        print(f"  >> NOTE: This is a directional heuristic, not a prediction. Validate against fundamentals.")
     elif bearish_count > bullish_count * 1.5:
-        print(f"  >> Overall: RISK-OFF BIAS")
+        print(f"  >> Overall: RISK-OFF BIAS (confidence: {bias_confidence:.1f}/max)")
+        print(f"  >> NOTE: This is a directional heuristic, not a prediction. Validate against fundamentals.")
     else:
         print(f"  >> Overall: MIXED - no dominant directional signal")
     print(f"\n{'=' * 70}\n")

@@ -8,6 +8,7 @@ import yfinance as yf
 import argparse
 import pandas as pd
 import numpy as np
+import re
 import sys
 import os
 
@@ -17,6 +18,12 @@ from datetime import datetime
 
 
 def analyze_sector_comparison(ticker, sector_etf="XLK", peers=None, start="2020-01-01", end=None):
+    # Validate date formats to prevent injection/logic errors
+    date_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+    if not date_pattern.match(start):
+        raise ValueError(f"Invalid start date format: '{start}'. Expected YYYY-MM-DD.")
+    if end is not None and not date_pattern.match(end):
+        raise ValueError(f"Invalid end date format: '{end}'. Expected YYYY-MM-DD.")
     if end is None:
         end = datetime.now().strftime("%Y-%m-%d")
     """
@@ -28,8 +35,8 @@ def analyze_sector_comparison(ticker, sector_etf="XLK", peers=None, start="2020-
     print(f"{'=' * 70}")
 
     # Fetch stock data
-    stock = extract_price_data(yf.download(ticker, start=start, progress=False), "Close")
-    sector = extract_price_data(yf.download(sector_etf, start=start, progress=False), "Close")
+    stock = extract_price_data(yf.download(ticker, start=start, end=end, progress=False), "Close")
+    sector = extract_price_data(yf.download(sector_etf, start=start, end=end, progress=False), "Close")
 
     # Calculate returns
     stock_returns = stock.pct_change().dropna()
@@ -49,8 +56,16 @@ def analyze_sector_comparison(ticker, sector_etf="XLK", peers=None, start="2020-
     stock_sharpe = float((stock_returns.mean() / stock_returns.std()) * np.sqrt(252))
     sector_sharpe = float((sector_returns.mean() / sector_returns.std()) * np.sqrt(252))
 
-    # Correlation
-    correlation = float(aligned[ticker].corr(aligned[sector_etf]))
+    # Rolling correlation (60-day) — shows evolving relationship, not just aggregate
+    if len(aligned) >= 60:
+        rolling_corr = aligned[ticker].rolling(60).corr(aligned[sector_etf])
+        current_correlation = float(rolling_corr.iloc[-1])
+        avg_correlation = float(rolling_corr.mean().item())
+        correlation = current_correlation  # Use current for display, add context below
+        print(f"  Rolling Correlation (60d): {current_correlation:.3f} (avg: {avg_correlation:.3f})")
+    else:
+        correlation = float(aligned[ticker].corr(aligned[sector_etf]))
+        print(f"  Correlation: {correlation:.3f} (insufficient data for rolling)")
 
     # Relative strength (stock return / sector return)
     relative_strength = stock_total / sector_total if sector_total != 0 else 0.0
@@ -99,11 +114,11 @@ def analyze_sector_comparison(ticker, sector_etf="XLK", peers=None, start="2020-
         peer_data = {}
         for peer in peers:
             try:
-                p = extract_price_data(yf.download(peer, start=start, progress=False), "Close")
+                p = extract_price_data(yf.download(peer, start=start, end=end, progress=False), "Close")
                 peer_total = float((p.iloc[-1] / p.iloc[0] - 1) * 100)
                 peer_data[peer] = peer_total
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"  [WARNING] Could not fetch peer {peer}: {e}")
 
         if peer_data:
             sorted_peers = sorted(peer_data.items(), key=lambda x: x[1], reverse=True)
@@ -115,7 +130,7 @@ def analyze_sector_comparison(ticker, sector_etf="XLK", peers=None, start="2020-
 
     # Regime detection
     print(f"\nMARKET REGIME DETECTION:")
-    spy = extract_price_data(yf.download("SPY", start=start, progress=False), "Close")
+    spy = extract_price_data(yf.download("SPY", start=start, end=end, progress=False), "Close")
     spy_ma200 = spy.rolling(200).mean()
 
     spy_last = float(spy.iloc[-1])

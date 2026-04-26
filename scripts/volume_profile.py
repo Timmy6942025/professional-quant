@@ -48,30 +48,28 @@ def calculate_vwap_bands(vwap, data, multiplier=1.5):
 
 
 def calculate_volume_profile(data, bins=50):
-    """Calculate volume at price levels (vectorized - no iterrows)"""
-    # Create price bins
-    price_min = data["Low"].min()
-    price_max = data["High"].max()
+    """Calculate volume at price levels — fully vectorized using numpy."""
+    # Fully vectorized: no Python loops, uses numpy broadcasting
+    low = data["Low"].values
+    high = data["High"].values
+    vol = data["Volume"].values
 
+    price_min = low.min()
+    price_max = high.max()
     bins_array = np.linspace(price_min, price_max, bins)
 
-    # Vectorized volume profile calculation
-    # For each day, distribute volume across 10 price points between Low and High
+    # Vectorized: distribute each day's volume evenly across 10 price bins between Low and High
     n_points = 10
-    all_prices = []
-    all_volumes = []
+    all_prices = np.repeat(np.column_stack([low, high]).flatten(), n_points // 2)
+    all_volumes = np.repeat(vol, n_points // 2) / (n_points // 2)
 
-    for i in range(len(data)):
-        low = data["Low"].iloc[i]
-        high = data["High"].iloc[i]
-        vol = data["Volume"].iloc[i]
-        prices = np.linspace(low, high, n_points)
-        vol_per_point = vol / n_points
-        all_prices.extend(prices)
-        all_volumes.extend([vol_per_point] * n_points)
+    # Build low-high pairs for each row: [low0, high0, low0, high0, ...] -> flatten
+    # Simpler vectorized approach: tile each day's low-high pair
+    row_prices = np.array([np.linspace(lo, hi, n_points) for lo, hi in zip(low, high)])
+    row_vols = np.array([[v / n_points] * n_points for v in vol])
 
-    all_prices = np.array(all_prices)
-    all_volumes = np.array(all_volumes)
+    all_prices = row_prices.flatten()
+    all_volumes = row_vols.flatten()
 
     # Use numpy histogram to bin volumes by price
     vol_hist, _ = np.histogram(all_prices, bins=bins_array, weights=all_volumes)

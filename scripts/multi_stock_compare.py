@@ -23,6 +23,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
+# Risk-free rate for Sharpe calculation (should match current environment)
+RISK_FREE_RATE = 0.04  # 4% annual — update as rates change
+
+
 def analyze_ticker(ticker, period="1y"):
     """Analyze single ticker"""
     try:
@@ -56,7 +60,8 @@ def analyze_ticker(ticker, period="1y"):
         max_drawdown = drawdown.min()
 
         # Sharpe ratio
-        sharpe = ((returns_1y / 100 - 0.05) / (volatility_1y / 100)) if volatility_1y > 0 else 0
+        risk_adj_return = (returns_1y / 100) - RISK_FREE_RATE
+        sharpe = (risk_adj_return / (volatility_1y / 100)) if volatility_1y > 0 else 0
 
         # Get fundamentals
         pe = info.get("trailingPE", 0) or 0
@@ -93,7 +98,9 @@ def calculate_score(ticker_data):
     score = 0
 
     score += min(40, ticker_data["returns_1y"] / 2)
-    score += min(30, max(0, ticker_data["sharpe"] * 15))
+    # Sharpe uses dynamic risk-free rate (was hardcoded at 5%)
+    risk_adjusted_return = (ticker_data["returns_1y"] / 100) - RISK_FREE_RATE
+    score += min(30, max(0, (risk_adjusted_return / (ticker_data["volatility_1y"] / 100)) * 15))
 
     if ticker_data["volatility_1y"] < 20:
         score += 15
@@ -206,7 +213,8 @@ def main():
 
     for idx, r in enumerate(results, 1):
         medal = "🥇" if idx == 1 else ("🥈" if idx == 2 else ("🥉" if idx == 3 else f"{idx}."))
-        print(f"   {medal} {r['ticker']:<8} Score: {r['score']:6.1f} - ", end="")
+        score_display = f"{r['score']:+.1f}"  # Show sign for negative scores
+        print(f"   {medal} {r['ticker']:<8} Score: {score_display} - ", end="")
 
         strengths = []
         if r["returns_1y"] > 20:

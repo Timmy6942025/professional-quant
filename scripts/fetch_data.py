@@ -35,7 +35,7 @@ def fetch_data(ticker, start="2025-01-01", end=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch historical stock data via yfinance (no API key)")
     parser.add_argument("ticker", help="Stock ticker (e.g., AAPL)")
-    parser.add_argument("--start", default="2025-01-01", help="Start date (YYYY-MM-DD)")
-    parser.add_argument("--end", default="2026-04-23", help="End date (YYYY-MM-DD)")
+    parser.add_argument("--start", default="2020-01-01", help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end", default=None, help="End date (YYYY-MM-DD)")
     args = parser.parse_args()
     fetch_data(args.ticker, args.start, args.end)

@@ -69,13 +69,19 @@ def get_strategy_stats(ticker):
         output2 = result2.stdout
 
         # Parse avg win/loss
-        avg_win_match = re.search(r"Avg Win: ([\d.-]+)%", output2)
-        avg_loss_match = re.search(r"Avg Loss: ([\d.-]+)%", output2)
+        avg_win_match = re.search(r"Avg Win: ([-+]?[\d.]+)%", output2)
+        avg_loss_match = re.search(r"Avg Loss: ([-+]?[\d.]+)%", output2)
 
         if avg_win_match and avg_loss_match:
             avg_win = float(avg_win_match.group(1))
             avg_loss = float(avg_loss_match.group(1))
+            if avg_loss == 0:
+                print(f"  [WARNING] Avg Loss is 0 — Kelly calculation unreliable. Check strategy.")
+                return None
             return {"win_rate": win_rate, "avg_win": avg_win, "avg_loss": avg_loss}
+        else:
+            print(f"  [WARNING] Could not parse avg win/loss from risk_metrics.py output.")
+            print(f"  Output format may have changed. Using default strategy assumptions.")
     except Exception as e:
         print(f"Error getting stats: {e}")
 

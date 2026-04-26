@@ -75,9 +75,13 @@ def forecast_stock(ticker, periods=30):
     # Calculate technical indicators
     df = calculate_technical_indicators(df)
 
-    # Prepare data for Prophet
+    # Prepare data for Prophet — hold out last 30 days for validation
     prophet_df = df[["Close"]].reset_index()
     prophet_df.columns = ["ds", "y"]
+
+    holdout_days = min(30, max(5, len(prophet_df) // 5))  # 30 days or 20% of data, min 5
+    train_df = prophet_df[:-holdout_days].copy()
+    validate_df = prophet_df[-holdout_days:].copy()
 
     # Prophet model with reasonable parameters
     model = Prophet(
@@ -87,11 +91,17 @@ def forecast_stock(ticker, periods=30):
         weekly_seasonality=True,
         daily_seasonality=False,
     )
-    model.fit(prophet_df)
+    model.fit(train_df)
 
-    # Create future dataframe
+    # Create future dataframe for full period (train + validation + future)
     future = model.make_future_dataframe(periods=periods)
     forecast = model.predict(future)
+
+    # Compute in-sample error on holdout for calibration reporting
+    validate_forecast = model.predict(validate_df[["ds"]])
+    mae = float((validate_forecast["yhat"] - validate_df["y"]).abs().mean())
+    mape = float(((validate_forecast["yhat"] - validate_df["y"]).abs() / validate_df["y"].abs()).mean() * 100)
+    print(f"  Prophet holdout validation: MAE=${mae:.2f}, MAPE={mape:.1f}%")
 
     # Current metrics
     current_price = float(df["Close"].iloc[-1])

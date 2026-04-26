@@ -16,8 +16,16 @@ from utils import flatten_yf_data, extract_price_data, safe_float
 from datetime import datetime
 
 
+TICKER_PATTERN = re.compile(r"^[A-Z]{1,5}$")
+
+
 def run_master_analysis(ticker):
     from datetime import datetime
+
+    # Belt-and-suspenders: validate ticker before passing to subprocesses
+    if not TICKER_PATTERN.match(ticker):
+        print(f"[ERROR] Invalid ticker format: '{ticker}' — must be 1-5 uppercase letters")
+        return {}
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -62,6 +70,11 @@ def run_master_analysis(ticker):
             results["uncertainty"] = float(uncertainty_match.group(1))
 
         # Set forecast signal based on data (not fake recommendation)
+        # Warn on missing forecast fields (indicates output format change)
+        for field in ["prophet_change", "rsi", "trend", "uncertainty"]:
+            if field not in results:
+                print(f"  [WARNING] forecast.py missing field '{field}' — output format may have changed")
+
         if results.get("prophet_change", 0) > 0 and results.get("rsi", 50) < 70:
             results["forecast_signal"] = "BULLISH"
         elif results.get("prophet_change", 0) < 0 and results.get("rsi", 50) > 30:
@@ -89,15 +102,23 @@ def run_master_analysis(ticker):
         )
         print(result.stdout)
 
-        # Parse backtest conviction
-        if "CONVICTION: STRONG BUY" in result.stdout:
-            results["backtest"] = "STRONG BUY"
-        elif "CONVICTION: BUY" in result.stdout:
-            results["backtest"] = "BUY"
-        elif "CONVICTION: STRONG SELL" in result.stdout:
-            results["backtest"] = "STRONG SELL"
-        else:
-            results["backtest"] = "SELL"
+        # Parse backtest conviction — add debug logging on failure
+        conviction_patterns = [
+            ("CONVICTION: STRONG BUY", "STRONG BUY"),
+            ("CONVICTION: BUY", "BUY"),
+            ("CONVICTION: STRONG SELL", "STRONG SELL"),
+            ("CONVICTION: SELL", "SELL"),
+        ]
+        results["backtest"] = "UNKNOWN"
+        for pattern, label in conviction_patterns:
+            if pattern in result.stdout:
+                results["backtest"] = label
+                break
+        # Warn if conviction not found
+        if results["backtest"] == "UNKNOWN":
+            print(
+                f"  [WARNING] backtest.py output format changed — conviction parsing failed. Got: {result.stdout[:200]}"
+            )
 
         # Parse alpha vs buy & hold (annualized)
         alpha_match = re.search(r"Alpha Generated \(annualized\): ([+-]?\d+\.\d+)%", result.stdout)

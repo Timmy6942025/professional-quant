@@ -65,19 +65,22 @@ def apply_friction(returns, entry_signals, exit_signals):
     Apply exchange fees and slippage to returns.
     Fees apply on entry AND exit.
     Slippage applies to both entry and exit prices.
+    Same-bar entry+exit (reversal) is charged as TWO trades (full round-trip friction).
     """
-    # Calculate number of trades
-    trades = (entry_signals.astype(int) + exit_signals.astype(int)).clip(0, 1)
-    num_trades = trades.sum()
+    # Entry: charges when position CHANGES from 0 to 1
+    # Exit: charges when position CHANGES from 1 to 0
+    entry_trades = entry_signals.astype(int)  # charges fee + slippage for entry
+    exit_trades = exit_signals.astype(int)  # charges fee + slippage for exit
 
-    # Apply friction to returns
-    # Fee: 0.1% per transaction (entry + exit = 0.2% per round trip)
-    # Slippage: 0.05% per trade
-    total_friction = EXCHANGE_FEE * 2 + SLIPPAGE * 2  # Round trip friction
+    # Total friction per trade type: fee (entry+exit) + slippage (entry+exit)
+    per_side_friction = EXCHANGE_FEE + SLIPPAGE  # 0.15% per side, 0.30% per round trip
 
-    # Deduct friction from returns on days we trade
-    friction_cost = trades * total_friction
-    returns_after_fees = returns - friction_cost
+    # Deduct entry costs on entry days
+    returns_after_fees = returns - (entry_trades * per_side_friction)
+    # Deduct exit costs on exit days
+    returns_after_fees = returns_after_fees - (exit_trades * per_side_friction)
+
+    num_trades = int(entry_trades.sum() + exit_trades.sum())
 
     return returns_after_fees, num_trades
 
@@ -133,10 +136,19 @@ def backtest_strategy(ticker, start="2020-01-01", end=None):
     sharpe = float((strategy_returns.mean() / std_sr) * np.sqrt(252)) if std_sr > 0 else 0
     max_dd = float(((cumulative / cumulative.cummax()) - 1).min() * 100)
 
-    # Win rate calculation
-    winning_days = (strategy_returns > 0).sum()
-    total_days = (strategy_returns != 0).sum()
-    win_rate = (winning_days / total_days * 100) if total_days > 0 else 0
+    # Win rate calculation — exclude cash days (no position) from denominator
+    # Also show trading-day win rate as an alternative metric
+    strategy_returns_valid = strategy_returns.dropna()
+    trading_days = (strategy_returns_valid != 0).sum()
+    all_days = len(strategy_returns_valid)
+    cash_days = all_days - trading_days
+
+    winning_days = (strategy_returns_valid > 0).sum()
+    win_rate_on_trading_days = (winning_days / trading_days * 100) if trading_days > 0 else 0
+    win_rate_all_days = (winning_days / all_days * 100) if all_days > 0 else 0  # includes cash days
+
+    # Default to trading-day win rate but note cash day exposure
+    win_rate = win_rate_on_trading_days
 
     results.append(
         {

@@ -28,6 +28,9 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+# Default annualization factor for daily returns
+ANNUALIZED_FACTOR = 252
+
 
 def load_required_packages():
     """Check and import optional packages"""
@@ -43,13 +46,13 @@ def load_required_packages():
         return False, None, None, None, None, None
 
 
-def calculate_manual_frontier(returns, n_portfolios=5000):
+def calculate_manual_frontier(returns, n_portfolios=5000, annualized_factor=ANNUALIZED_FACTOR):
     """Calculate efficient frontier manually (no pypfopt needed)"""
     n_assets = returns.shape[1]
 
     # Calculate mean returns and covariance
-    mean_returns = returns.mean() * 252
-    cov_matrix = returns.cov() * 252
+    mean_returns = returns.mean() * annualized_factor
+    cov_matrix = returns.cov() * annualized_factor
 
     # Generate random portfolios
     results = np.zeros((3, n_portfolios))
@@ -65,7 +68,9 @@ def calculate_manual_frontier(returns, n_portfolios=5000):
 
         results[0, i] = portfolio_return
         results[1, i] = portfolio_std
-        results[2, i] = (portfolio_return - 0.02) / portfolio_std if portfolio_std > 0 else 0  # Sharpe (2% risk-free)
+        results[2, i] = (
+            (portfolio_return - 0.02) / portfolio_std if portfolio_std > 0 else 0
+        )  # Sharpe (2% annual risk-free)
 
     # Find max Sharpe
     max_sharpe_idx = np.argmax(results[2])
@@ -89,12 +94,17 @@ def calculate_manual_frontier(returns, n_portfolios=5000):
     }
 
 
-def calculate_risk_parity(returns):
+def calculate_risk_parity(returns, annualized_factor=ANNUALIZED_FACTOR):
     """Simple risk parity allocation"""
-    cov_matrix = returns.cov() * 252
+    cov_matrix = returns.cov() * annualized_factor
 
     # Inverse volatility weighting
     vols = np.sqrt(np.diag(cov_matrix))
+    # Guard against zero-vol assets: if any vol is near-zero, fall back to equal weight
+    if np.any(vols < 1e-8):
+        print("  [WARNING] Near-zero volatility detected — using equal weight allocation")
+        n_assets = len(vols)
+        return np.ones(n_assets) / n_assets
     inv_vols = 1.0 / vols
     weights = inv_vols / np.sum(inv_vols)
 
@@ -157,6 +167,19 @@ def main():
         print("❌ Insufficient data for optimization")
         return
 
+    # Validate data frequency — detect if data is daily vs weekly vs monthly
+    avg_daily_returns = returns.mean()
+    annualized_factor = 252  # assume daily data by default
+    # If average daily return is very small (< 0.1%), likely weekly or monthly data
+    if abs(avg_daily_returns.mean()) < 0.001:
+        annualized_factor = 52  # weekly data
+        print(f"  [INFO] Detected weekly data — using 52 trading periods/year")
+    elif abs(avg_daily_returns.mean()) > 0.01:
+        annualized_factor = 12  # monthly data
+        print(f"  [INFO] Detected monthly data — using 12 periods/year")
+    else:
+        print(f"  [INFO] Detected daily data — using 252 trading periods/year")
+
     print(f"   Data points: {len(returns)}")
     print(f"   Tickers: {list(returns.columns)}")
 
@@ -166,7 +189,7 @@ def main():
     print(f"{'─' * 70}")
     print(f"   Generating {args.portfolios} random portfolios...")
 
-    frontier = calculate_manual_frontier(returns, args.portfolios)
+    frontier = calculate_manual_frontier(returns, args.portfolios, annualized_factor=annualized_factor)
 
     # Results
     print(f"\n📊 MAX SHARPE RATIO PORTFOLIO:")
@@ -189,7 +212,7 @@ def main():
             print(f"      {ticker}: {w * 100:.1f}%")
 
     # ========== RISK PARITY ==========
-    rp_weights = calculate_risk_parity(returns)
+    rp_weights = calculate_risk_parity(returns, annualized_factor=annualized_factor)
 
     rp_return = np.dot(rp_weights, frontier["mean_returns"])
     rp_vol = np.sqrt(np.dot(rp_weights.T, np.dot(frontier["cov_matrix"], rp_weights)))

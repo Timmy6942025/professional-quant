@@ -246,7 +246,7 @@ def analyze_earnings_quality(ticker):
         elif momentum_signal == "DECELERATING":
             quality_score -= 1
 
-        max_score = 7
+        max_score = 6  # Theoretical max: 2(cf)+2(rev)+1(margin)+1(momentum)=6
         pct_score = (quality_score / max_score) * 100
 
         print(f"\n  Quality Components:")

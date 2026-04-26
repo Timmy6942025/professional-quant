@@ -53,9 +53,23 @@ def get_gamma_exposure(ticker):
 
 
 def estimate_cost_to_borrow(days_to_cover, short_float_pct):
-    """Estimate annualized cost-to-borrow from days-to-cover and short interest."""
-    annual_turns = 252 / max(days_to_cover, 1)
-    estimated_rate = min(short_float_pct / 10 * 0.05, 0.50)
+    """
+    Estimate annualized cost-to-borrow from days-to-cover and short interest.
+
+    Formula: rate = min(short_float% / 10 * 5%, 50%)
+    Heuristic basis:
+      - 10% short interest → ~5% annual borrow rate (market equilibrium for high-demand stocks)
+      - 20% short interest → ~10% annual borrow rate (up to 5x as scarcity increases cost)
+      - Cap at 50% to prevent runaway estimates for extremely shorted names
+
+    Note: This is a rough heuristic. Real borrow rates require broker data (e.g. via
+    DataLend, S&P Global, or Interactive Brokers API). Use as a directional signal only.
+    """
+    # Validate inputs to prevent garbage-in/garbage-out
+    dtc = max(float(days_to_cover), 0.5)  # minimum 0.5 days to avoid div/zero
+    sfp = max(float(short_float_pct), 0.0)  # minimum 0% short interest
+
+    estimated_rate = min(sfp / 10 * 0.05, 0.50)
     return estimated_rate
 
 
@@ -104,6 +118,8 @@ def analyze_short_squeeze(ticker, sector=None):
         alert_level, alert_emoji = squeeze_alert_level(short_float_pct, days_to_cover)
         gamma = get_gamma_exposure(ticker)
         cost_to_borrow = estimate_cost_to_borrow(days_to_cover, short_float_pct) if short_float_pct > 1 else 0
+        # NOTE: Cost-to-borrow is a heuristic estimate (based on short_float and days-to-cover).
+        # Actual borrow rates vary by broker and availability. Treat as directional indicator only.
 
         return {
             "ticker": ticker,
@@ -226,9 +242,9 @@ def main():
         print(f"      Short Float: {r['short_float_pct']:.1f}% ({r['alert_emoji']} {r['alert_level']})")
         print(f"      Days to Cover: {r['days_to_cover']:.1f}")
         print(
-            f"      Cost to Borrow: ~{r['cost_to_borrow'] * 100:.1f}%/yr"
+            f"      Cost to Borrow: ~{r['cost_to_borrow'] * 100:.1f}%/yr (ESTIMATED)"
             if r["cost_to_borrow"] > 0
-            else "      Cost to Borrow: N/A"
+            else "      Cost to Borrow: N/A (estimate unavailable)"
         )
         print(f"      5D Return: {r['returns_5d']:+.1f}%  |  1M Return: {r['returns_1m']:+.1f}%")
         print(f"      52W Position: {r['price_position']:.0f}%")

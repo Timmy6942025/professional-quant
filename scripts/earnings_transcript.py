@@ -12,6 +12,7 @@ Usage:
 """
 
 import argparse
+import re
 import sys
 import os
 from datetime import datetime, timedelta
@@ -188,6 +189,11 @@ def detect_red_flags(info):
 
 def analyze_earnings(ticker, quarters=4):
     """Main earnings analysis for a ticker."""
+    # Validate and normalize ticker format
+    ticker = ticker.upper().strip()
+    if not re.match(r"^[A-Z]{1,5}$", ticker):
+        print(f"[ERROR] Invalid ticker format: '{ticker}'. Must be 1-5 uppercase letters.")
+        return
     stock = yf.Ticker(ticker)
     info = stock.info
 

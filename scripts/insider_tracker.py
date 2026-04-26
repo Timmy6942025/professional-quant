@@ -35,20 +35,13 @@ def get_insider_transactions(ticker):
         # Get institutional holders for context
         inst_holders = stock.get_institutional_holders()
 
-        # Handle empty DataFrames safely
-        insider_val = 0
-        inst_val = 0
-        try:
-            if insider_holders is not None and not insider_holders.empty and len(insider_holders) > 0:
-                insider_val = insider_holders["Holder"].iloc[0]
-            if insider_holders is not None and not insider_holders.empty and len(insider_holders) > 1:
-                inst_val = insider_holders["Holder"].iloc[1]
-        except (KeyError, IndexError, TypeError):
-            pass
+        # Extract ownership percentages from info dict (reliable source)
+        insider_pct = info.get("heldByInsiders", 0) or 0
+        inst_pct = info.get("heldByInstitutions", 0) or 0
 
         return {
-            "insider_ownership": insider_val,
-            "institutions_ownership": inst_val,
+            "insider_ownership": insider_pct,
+            "institutions_ownership": inst_pct,
             "short_ratio": info.get("shortRatio", 0) or 0,
             "institutional_transactions": inst_holders.to_dict() if not inst_holders.empty else {},
         }
@@ -120,16 +113,25 @@ def main():
             print(f"   {'─' * 40}")
 
             # Get 13F filing activity from news/major holders
+            # yfinance get_major_holders() columns: 'Holder', 'Date', 'Shares', '% Held'
             try:
                 major_holders = stock.get_major_holders()
                 if not major_holders.empty:
+                    col_names = list(major_holders.columns)
+                    has_shares = "Shares" in col_names
+                    has_pct = "% Held" in col_names
                     for _, row in major_holders.head(5).iterrows():
                         holder = str(row.get("Holder", ""))[:30]
-                        shares = row.get("Date", "")
+                        if has_shares:
+                            shares_str = f" ({row['Shares']:,.0f} shares)"
+                        elif has_pct:
+                            shares_str = f" ({row['% Held'] * 100:.2f}% held)"
+                        else:
+                            shares_str = ""
                         if holder and "holder" not in holder.lower():
-                            print(f"   • {holder}")
-            except Exception:
-                pass
+                            print(f"   • {holder}{shares_str}")
+            except Exception as e:
+                print(f"  [WARNING] Could not process insider holders: {e}")
 
             # Recommendations
             print(f"\n{'─' * 70}")

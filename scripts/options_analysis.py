@@ -139,6 +139,10 @@ def analyze_options(ticker):
         print(f"{'─' * 70}")
 
         if not near_calls.empty and "impliedVolatility" in near_calls.columns:
+            # Gamma Exposure (GEX) calculation:
+            # Approximation: OI * strike * IV * 0.01 — relative gamma concentration by strike.
+            # For absolute dollar gamma, use a proper options pricing library (e.g., py_vollib).
+            # Put GEX is subtracted (market-maker delta-hedge is inverse for puts).
             gamma_calls = near_calls["openInterest"] * near_calls["strike"] * near_calls["impliedVolatility"] * 0.01
             gamma_puts = near_puts["openInterest"] * near_puts["strike"] * near_puts["impliedVolatility"] * 0.01
 
@@ -150,12 +154,16 @@ def analyze_options(ticker):
             print(f"  Put Gamma Exposure: ${total_put_gamma / 1e6:.2f}M")
             print(f"  Net Gamma: ${net_gamma / 1e6:.2f}M")
 
+            abs_net_gamma = abs(net_gamma)
             if net_gamma > 0:
-                print(f"  → POSITIVE GEX: Market makers buying dips (support)")
-                gex_signal = "SUPPORT"
+                # Positive GEX: call-heavy — dealers hedge upward moves, can amplify rallies
+                print(f"  → POSITIVE GEX: Call-heavy positioning (upside squeeze potential)")
+                gex_signal = "UPSIDE SQUEEZE"
             else:
-                print(f"  → NEGATIVE GEX: Market makers selling rallies (resistance)")
-                gex_signal = "RESISTANCE"
+                # Negative GEX: put-heavy — dealers hedge downward moves, can amplify selloffs
+                print(f"  → NEGATIVE GEX: Put-heavy positioning (downside cascade risk)")
+                gex_signal = "DOWNSIDE CASCADE"
+            print(f"  → GEX magnitude: ${abs_net_gamma / 1e6:.2f}M (higher = more squeeze potential)")
 
             near_calls["gamma"] = near_calls["openInterest"] * near_calls["impliedVolatility"]
             near_puts["gamma"] = near_puts["openInterest"] * near_puts["impliedVolatility"]

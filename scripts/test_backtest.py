@@ -158,20 +158,20 @@ class TestApplyFriction:
         entry = pd.Series([False, True, False])
         exit_sig = pd.Series([False, False, False])
         result, num_trades = apply_friction(returns, entry, exit_sig)
-        total_friction = EXCHANGE_FEE * 2 + SLIPPAGE * 2
+        total_friction = EXCHANGE_FEE + SLIPPAGE  # 0.15% per side
         assert result.iloc[1] == pytest.approx(0.02 - total_friction)
-        assert num_trades == 1
+        assert num_trades == 1  # entry only = 1 trade
 
     def test_entry_and_exit_same_day(self):
-        """Entry + exit on same day = 1 trade (clipped)."""
+        """Entry + exit on same day: both charged, but counted as 1 position change."""
         returns = pd.Series([0.01, 0.02])
         entry = pd.Series([False, True])
         exit_sig = pd.Series([False, True])
         result, num_trades = apply_friction(returns, entry, exit_sig)
-        # Both entry and exit on day 1 → clip to 1 trade
-        total_friction = EXCHANGE_FEE * 2 + SLIPPAGE * 2
-        assert result.iloc[1] == pytest.approx(0.02 - total_friction)
-        assert num_trades == 1
+        # Entry AND exit both fire on day 1: charged twice (0.0015 each side)
+        per_side = EXCHANGE_FEE + SLIPPAGE
+        assert result.iloc[1] == pytest.approx(0.02 - per_side * 2)  # 0.017
+        assert num_trades == 2  # entry + exit = 2 trade events, each charged
 
     def test_multiple_trades(self):
         """Multiple trade days should each get friction deducted."""
@@ -179,7 +179,7 @@ class TestApplyFriction:
         entry = pd.Series([False, True, False, True])
         exit_sig = pd.Series([False, False, True, False])
         result, num_trades = apply_friction(returns, entry, exit_sig)
-        total_friction = EXCHANGE_FEE * 2 + SLIPPAGE * 2
+        total_friction = EXCHANGE_FEE + SLIPPAGE  # 0.15% per side
         assert result.iloc[1] == pytest.approx(0.02 - total_friction)
         assert result.iloc[2] == pytest.approx(-0.01 - total_friction)
         assert result.iloc[3] == pytest.approx(0.03 - total_friction)

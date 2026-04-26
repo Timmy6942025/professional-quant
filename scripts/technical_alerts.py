@@ -71,12 +71,26 @@ def detect_support_resistance(data, window=20):
     """Detect support and resistance levels"""
     levels = []
 
+    # Also check the LAST window bars for local extremes (don't skip the recent period)
+    # Get local extremes for the full dataset minus edges for the rolling window
     for i in range(window, len(data) - window):
+        local_highs = data["High"].iloc[i - window : i + window + 1]
+        local_lows = data["Low"].iloc[i - window : i + window + 1]
         # Check if this is a local high (resistance)
-        if data["High"].iloc[i] == data["High"].iloc[i - window : i + window + 1].max():
+        if data["High"].iloc[i] == local_highs.max():
             levels.append({"price": float(data["High"].iloc[i]), "type": "RESISTANCE", "touches": 1})
         # Check if this is a local low (support)
-        if data["Low"].iloc[i] == data["Low"].iloc[i - window : i + window + 1].min():
+        if data["Low"].iloc[i] == local_lows.min():
+            levels.append({"price": float(data["Low"].iloc[i]), "type": "SUPPORT", "touches": 1})
+    # Check last 'window' bars specifically for recent support/resistance
+    for i in range(len(data) - window, len(data)):
+        if i < window:
+            continue  # can't look back far enough
+        local_highs = data["High"].iloc[max(0, i - window) : i + 1]
+        local_lows = data["Low"].iloc[max(0, i - window) : i + 1]
+        if data["High"].iloc[i] == local_highs.max():
+            levels.append({"price": float(data["High"].iloc[i]), "type": "RESISTANCE", "touches": 1})
+        if data["Low"].iloc[i] == local_lows.min():
             levels.append({"price": float(data["Low"].iloc[i]), "type": "SUPPORT", "touches": 1})
 
     # Merge nearby levels
@@ -118,6 +132,12 @@ def calculate_rsi(data, period=14):
     avg_gain = gain.rolling(period).mean()
     avg_loss = loss.rolling(period).mean()
 
+    last_avg_loss = float(avg_loss.iloc[-1]) if not avg_loss.empty else 0.0
+    last_avg_gain = float(avg_gain.iloc[-1]) if not avg_gain.empty else 0.0
+    if pd.isna(last_avg_loss) or pd.isna(last_avg_gain):
+        return 50.0  # Insufficient data for RSI calculation
+    if last_avg_loss == 0:
+        return 100.0  # All gains, no losses
     rs = avg_gain / avg_loss
     rsi = 100 - (100 / (1 + rs))
 

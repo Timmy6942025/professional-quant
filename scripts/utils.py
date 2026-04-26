@@ -32,14 +32,19 @@ def extract_price_data(raw, column="Close"):
     """Extract price data from yfinance download result.
 
     Handles both single-ticker and multi-ticker downloads.
-    Returns a DataFrame with ticker names as columns.
+    Returns:
+        Series: single-ticker downloads (1D result from yf.download)
+        DataFrame: multi-ticker downloads (2D result from yf.download)
+
+    Note: single-ticker results from yfinance are returned as a pd.Series.
+    Callers needing consistent DataFrame output can call result.to_frame().
 
     Args:
         raw: DataFrame from yf.download()
         column: Price column to extract ('Close', 'Adj Close', 'Open', etc.)
 
     Returns:
-        DataFrame with tickers as columns, or Series for single ticker
+        Series for single ticker, DataFrame for multi-ticker downloads.
     """
     if isinstance(raw.columns, pd.MultiIndex):
         # MultiIndex: columns are (PriceType, Ticker)

@@ -14,6 +14,8 @@ from datetime import datetime
 def calculate_comprehensive_risk(ticker, start="2020-01-01", end=None):
     if end is None:
         end = datetime.now().strftime("%Y-%m-%d")
+    if end is None:
+        end = datetime.now().strftime("%Y-%m-%d")
     df = yf.download(ticker, start=start, end=end, progress=False)
     if df.empty:
         raise ValueError(f"No data for {ticker}")
@@ -35,10 +37,15 @@ def calculate_comprehensive_risk(ticker, start="2020-01-01", end=None):
     sharpe = float((returns.mean() / returns.std()) * ann_factor) if std_val > 0 else 0
 
     downside_returns = returns[returns < 0]
-    if len(downside_returns) > 0:
-        sortino = float((returns.mean() / downside_returns.std()) * ann_factor)
+    if len(downside_returns) > 2:
+        downside_std = float(downside_returns.std())
+        if downside_std > 0:
+            # Annualize both numerator (mean daily return * 252) and denominator (daily downside std * sqrt(252))
+            sortino = float((returns.mean() * 252) / (downside_std * ann_factor))
+        else:
+            sortino = 0.0
     else:
-        sortino = 0
+        sortino = 0.0
 
     cummax = close.cummax()
     drawdown = close / cummax - 1
@@ -64,8 +71,15 @@ def calculate_comprehensive_risk(ticker, start="2020-01-01", end=None):
         valid_idx = aligned_returns.notna() & spy_returns_aligned.notna()
         if valid_idx.sum() > 10:
             cov = np.cov(aligned_returns[valid_idx], spy_returns_aligned[valid_idx])
-            beta = float(cov[0, 1] / np.var(spy_returns_aligned[valid_idx]))
+            spy_var = float(np.var(spy_returns_aligned[valid_idx]))
+            if spy_var > 0:
+                beta = float(cov[0, 1] / spy_var)
+            else:
+                beta = 1.0
+                print(f"  [WARNING] SPY variance near zero — defaulting beta to 1.0")
         else:
+            # Warn since this fallback is silent and can mislead
+            print(f"  [WARNING] Insufficient aligned data for beta (only {valid_idx.sum()} points). Defaulting to 1.0.")
             beta = 1.0
     except Exception:
         beta = 1.0
@@ -135,6 +149,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Comprehensive risk analysis")
     parser.add_argument("ticker", help="Stock ticker (e.g., AAPL)")
     parser.add_argument("--start", default="2020-01-01", help="Start date (YYYY-MM-DD)")
-    parser.add_argument("--end", default="2026-04-23", help="End date (YYYY-MM-DD)")
+    parser.add_argument("--end", default=None, help="End date (YYYY-MM-DD)")
     args = parser.parse_args()
     calculate_comprehensive_risk(args.ticker, args.start, args.end)

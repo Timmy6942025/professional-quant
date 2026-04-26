@@ -42,16 +42,26 @@ def analyze_multitimeframe(ticker):
             rsi = 100 - (100 / (1 + rs))
             return rsi.iloc[-1]
 
-        def analyze_timeframe(df):
+        def analyze_timeframe(df, name):
             close = df["Close"]
             sma_20 = close.rolling(window=20).mean()
-            sma_50 = close.rolling(window=50).mean()
-            sma_200 = close.rolling(window=200).mean()
+            # Use min(50, len-1) for window — monthly data may not have enough bars
+            max_window_50 = min(50, len(close) - 1) if len(close) > 2 else len(close)
+            max_window_200 = min(200, len(close) - 1) if len(close) > 2 else len(close)
+            sma_50 = close.rolling(window=max(2, max_window_50)).mean()
+            sma_200 = close.rolling(window=max(2, max_window_200)).mean()
 
             current_price = float(close.iloc[-1])
             sma20_val = sma_20.iloc[-1] if not pd.isna(sma_20.iloc[-1]) else 0
             sma50_val = sma_50.iloc[-1] if not pd.isna(sma_50.iloc[-1]) else 0
             sma200_val = sma_200.iloc[-1] if not pd.isna(sma_200.iloc[-1]) else 0
+
+            # Warn if SMA window was adjusted
+            if max_window_50 < 50:
+                print(
+                    f"  [WARNING] {name}: SMA(50) reduced to SMA({max_window_50}) "
+                    f"due to limited bars ({len(close)} total)"
+                )
 
             if sma20_val > 0 and sma50_val > 0:
                 if sma20_val > sma50_val:
@@ -74,9 +84,9 @@ def analyze_multitimeframe(ticker):
                 "price_vs_200ma": price_vs_200ma,
             }
 
-        monthly_analysis = analyze_timeframe(monthly)
-        weekly_analysis = analyze_timeframe(weekly)
-        daily_analysis = analyze_timeframe(daily)
+        monthly_analysis = analyze_timeframe(monthly, "MONTHLY")
+        weekly_analysis = analyze_timeframe(weekly, "WEEKLY")
+        daily_analysis = analyze_timeframe(daily, "DAILY")
 
         def print_timeframe(name, data):
             print(f"\n{'─' * 70}")
